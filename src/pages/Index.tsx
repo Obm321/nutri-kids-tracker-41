@@ -9,7 +9,7 @@ const Index = () => {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-muted p-4">
+      <div className="min-h-screen flex items-center justify-center bg-muted px-4 py-6 sm:p-4">
         <AuthForm onAuthSuccess={() => setIsAuthenticated(true)} />
       </div>
     );
@@ -18,13 +18,13 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-muted">
       <DashboardHeader />
-      <main className="container py-6 space-y-6">
+      <main className="container px-4 py-4 sm:py-6 space-y-4 sm:space-y-6">
         <ChildProfile
           name="Alex"
           age={8}
           achievements={5}
         />
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
           <NutritionCard
             title="Calories"
             value={1200}
