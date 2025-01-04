@@ -5,6 +5,7 @@ import { ChildProfile } from "@/components/dashboard/ChildProfile";
 import { Calendar } from "@/components/dashboard/Calendar";
 import { AddChildDialog } from "@/components/dashboard/AddChildDialog";
 import { AddChildColumn } from "@/components/dashboard/AddChildColumn";
+import { ChildDashboard } from "@/components/dashboard/ChildDashboard";
 import { useToast } from "@/hooks/use-toast";
 
 interface ChildData {
@@ -22,6 +23,7 @@ const Index = () => {
   const [isAddChildOpen, setIsAddChildOpen] = useState(false);
   const [children, setChildren] = useState<ChildData[]>([]);
   const [editingChild, setEditingChild] = useState<ChildData | null>(null);
+  const [selectedChild, setSelectedChild] = useState<ChildData | null>(null);
   const { toast } = useToast();
 
   const handleAddChild = (childData: Omit<ChildData, "id" | "achievements">) => {
@@ -44,19 +46,25 @@ const Index = () => {
     setChildren(children.filter(child => child.id !== childId));
   };
 
-  const handleChildClick = () => {
-    // This will be implemented later for specific child dashboard
-    toast({
-      title: "Coming Soon",
-      description: "Child dashboard will be implemented in the next phase.",
-    });
-  };
-
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-muted px-4 py-6 sm:p-4">
         <AuthForm onAuthSuccess={() => setIsAuthenticated(true)} />
       </div>
+    );
+  }
+
+  if (selectedChild) {
+    return (
+      <ChildDashboard 
+        child={{
+          name: selectedChild.name,
+          age: parseInt(selectedChild.age),
+          gender: selectedChild.gender,
+          height: selectedChild.height,
+          weight: selectedChild.weight,
+        }}
+      />
     );
   }
 
@@ -72,7 +80,7 @@ const Index = () => {
               name={child.name}
               age={parseInt(child.age)}
               achievements={child.achievements}
-              onClick={handleChildClick}
+              onClick={() => setSelectedChild(child)}
               onEdit={() => setEditingChild(child)}
               onDelete={() => handleDeleteChild(child.id)}
             />

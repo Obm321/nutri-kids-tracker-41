@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 export const Calendar = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
+  const isDraggingRef = useRef(false);
+  const startXRef = useRef(0);
 
   const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
   
@@ -30,22 +32,38 @@ export const Calendar = () => {
 
   return (
     <div 
-      className="bg-secondary w-full p-4 text-white rounded-t-lg"
+      className="bg-secondary w-full p-4 text-white rounded-t-lg select-none"
+      onMouseDown={(e) => {
+        isDraggingRef.current = true;
+        startXRef.current = e.clientX;
+      }}
+      onMouseMove={(e) => {
+        if (!isDraggingRef.current) return;
+        
+        const diff = startXRef.current - e.clientX;
+        if (Math.abs(diff) > 50) {
+          handleSwipe(diff > 0 ? 'right' : 'left');
+          isDraggingRef.current = false;
+        }
+      }}
+      onMouseUp={() => {
+        isDraggingRef.current = false;
+      }}
+      onMouseLeave={() => {
+        isDraggingRef.current = false;
+      }}
       onTouchStart={(e) => {
         const touch = e.touches[0];
-        const startX = touch.clientX;
+        startXRef.current = touch.clientX;
+      }}
+      onTouchMove={(e) => {
+        const touch = e.touches[0];
+        const diff = startXRef.current - touch.clientX;
         
-        const handleTouchEnd = (e: TouchEvent) => {
-          const touch = e.changedTouches[0];
-          const endX = touch.clientX;
-          const diff = startX - endX;
-          
-          if (Math.abs(diff) > 50) {
-            handleSwipe(diff > 0 ? 'right' : 'left');
-          }
-        };
-        
-        document.addEventListener('touchend', handleTouchEnd, { once: true });
+        if (Math.abs(diff) > 50) {
+          handleSwipe(diff > 0 ? 'right' : 'left');
+          startXRef.current = touch.clientX;
+        }
       }}
     >
       <div className="grid grid-cols-7 gap-4 text-center">
@@ -57,7 +75,8 @@ export const Calendar = () => {
         {weekDates.map((date, index) => (
           <div 
             key={index} 
-            className={`text-lg p-2 rounded-full ${date === today ? 'bg-white text-secondary' : ''}`}
+            className={`text-lg p-2 rounded-full cursor-pointer transition-colors
+              ${date === today ? 'bg-white text-secondary' : 'hover:bg-white/10'}`}
           >
             {date}
           </div>
