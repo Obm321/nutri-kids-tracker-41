@@ -1,30 +1,16 @@
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Award } from "lucide-react";
+import { Settings } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface ChildProfileProps {
   name: string;
   age: number;
   achievements: number;
+  onClick?: () => void;
 }
 
-export const ChildProfile = ({ name, age, achievements }: ChildProfileProps) => {
+export const ChildProfile = ({ name, age, achievements, onClick }: ChildProfileProps) => {
   const { toast } = useToast();
-
-  const handleProgress = () => {
-    toast({
-      title: "Progress Tracking",
-      description: "Viewing progress charts will be available soon.",
-    });
-  };
-
-  const handleHistory = () => {
-    toast({
-      title: "Meal History",
-      description: "Viewing meal history will be available soon.",
-    });
-  };
 
   const handleSettings = () => {
     toast({
@@ -34,8 +20,21 @@ export const ChildProfile = ({ name, age, achievements }: ChildProfileProps) => 
   };
 
   return (
-    <Card className="p-4 sm:p-6 animate-fadeIn">
-      <div className="flex items-center gap-3 sm:gap-4">
+    <Card 
+      className="p-4 sm:p-6 animate-fadeIn cursor-pointer relative"
+      onClick={onClick}
+    >
+      <button 
+        className="absolute top-2 right-2 p-2 hover:bg-muted rounded-full"
+        onClick={(e) => {
+          e.stopPropagation();
+          handleSettings();
+        }}
+      >
+        <Settings className="w-5 h-5 text-muted-foreground" />
+      </button>
+      
+      <div className="flex items-center gap-3 sm:gap-4 mb-4">
         <div className="h-12 w-12 sm:h-16 sm:w-16 rounded-full bg-primary flex items-center justify-center">
           <span className="text-xl sm:text-2xl font-bold text-white">
             {name.charAt(0)}
@@ -45,33 +44,25 @@ export const ChildProfile = ({ name, age, achievements }: ChildProfileProps) => 
           <h2 className="text-lg sm:text-xl font-bold">{name}</h2>
           <p className="text-sm sm:text-base text-muted-foreground">{age} years old</p>
         </div>
-        <div className="ml-auto flex items-center gap-1 sm:gap-2">
-          <Award className="w-4 h-4 sm:w-5 sm:h-5 text-warning-DEFAULT" />
-          <span className="text-sm sm:text-base font-medium">{achievements} achievements</span>
+      </div>
+
+      <div className="grid grid-cols-3 gap-2">
+        <div className="bg-[#FCD34D] rounded-lg p-2 text-center">
+          <span className="text-lg font-bold">C</span>
+          <div className="text-sm">0g</div>
+        </div>
+        <div className="bg-[#4ADE80] rounded-lg p-2 text-center">
+          <span className="text-lg font-bold">P</span>
+          <div className="text-sm">0g</div>
+        </div>
+        <div className="bg-[#60A5FA] rounded-lg p-2 text-center">
+          <span className="text-lg font-bold">F</span>
+          <div className="text-sm">0g</div>
         </div>
       </div>
-      <div className="mt-4 grid grid-cols-3 gap-2 sm:gap-4">
-        <Button 
-          variant="outline" 
-          className="w-full text-sm sm:text-base"
-          onClick={handleProgress}
-        >
-          Progress
-        </Button>
-        <Button 
-          variant="outline" 
-          className="w-full text-sm sm:text-base"
-          onClick={handleHistory}
-        >
-          History
-        </Button>
-        <Button 
-          variant="outline" 
-          className="w-full text-sm sm:text-base"
-          onClick={handleSettings}
-        >
-          Settings
-        </Button>
+
+      <div className="mt-4 text-center text-sm text-muted-foreground">
+        {achievements} achievements
       </div>
     </Card>
   );
