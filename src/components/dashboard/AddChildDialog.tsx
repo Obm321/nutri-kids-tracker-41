@@ -20,9 +20,16 @@ import { useToast } from "@/hooks/use-toast";
 interface AddChildDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onAddChild?: (childData: {
+    name: string;
+    age: string;
+    gender: string;
+    height: string;
+    weight: string;
+  }) => void;
 }
 
-export const AddChildDialog = ({ open, onOpenChange }: AddChildDialogProps) => {
+export const AddChildDialog = ({ open, onOpenChange, onAddChild }: AddChildDialogProps) => {
   const [name, setName] = useState("");
   const [age, setAge] = useState("");
   const [gender, setGender] = useState("");
@@ -42,6 +49,14 @@ export const AddChildDialog = ({ open, onOpenChange }: AddChildDialogProps) => {
       return;
     }
 
+    onAddChild?.({
+      name,
+      age,
+      gender,
+      height,
+      weight,
+    });
+
     toast({
       title: "Success",
       description: "Child profile created successfully.",
@@ -57,7 +72,7 @@ export const AddChildDialog = ({ open, onOpenChange }: AddChildDialogProps) => {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] bg-white">
         <DialogHeader>
           <DialogTitle>Add Child Profile</DialogTitle>
         </DialogHeader>
@@ -86,13 +101,12 @@ export const AddChildDialog = ({ open, onOpenChange }: AddChildDialogProps) => {
           <div className="space-y-2">
             <Label htmlFor="gender">Gender</Label>
             <Select value={gender} onValueChange={setGender}>
-              <SelectTrigger>
+              <SelectTrigger className="bg-white">
                 <SelectValue placeholder="Select gender" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white">
                 <SelectItem value="male">Male</SelectItem>
                 <SelectItem value="female">Female</SelectItem>
-                <SelectItem value="other">Other</SelectItem>
               </SelectContent>
             </Select>
           </div>

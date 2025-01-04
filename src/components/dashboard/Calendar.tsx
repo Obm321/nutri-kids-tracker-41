@@ -1,4 +1,3 @@
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
 
 export const Calendar = () => {
@@ -6,15 +5,10 @@ export const Calendar = () => {
 
   const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
   
-  const handlePrevWeek = () => {
+  const handleSwipe = (direction: 'left' | 'right') => {
     const newDate = new Date(currentDate);
-    newDate.setDate(currentDate.getDate() - 7);
-    setCurrentDate(newDate);
-  };
-
-  const handleNextWeek = () => {
-    const newDate = new Date(currentDate);
-    newDate.setDate(currentDate.getDate() + 7);
+    const daysToAdd = direction === 'left' ? -7 : 7;
+    newDate.setDate(currentDate.getDate() + daysToAdd);
     setCurrentDate(newDate);
   };
 
@@ -32,32 +26,39 @@ export const Calendar = () => {
   };
 
   const weekDates = getWeekDates(currentDate);
-  const month = currentDate.toLocaleString('default', { month: 'long' });
+  const today = new Date().getDate();
 
   return (
-    <div className="bg-secondary w-full p-4 text-white rounded-t-lg">
-      <div className="flex justify-between items-center mb-4">
-        <button onClick={handlePrevWeek} className="p-2">
-          <ChevronLeft className="w-6 h-6" />
-        </button>
-        <div className="flex items-center gap-2">
-          <div className="bg-white text-secondary rounded-full p-4 text-center">
-            <div className="text-sm">{month}</div>
-            <div className="text-2xl font-bold">{currentDate.getDate()}</div>
-          </div>
-        </div>
-        <button onClick={handleNextWeek} className="p-2">
-          <ChevronRight className="w-6 h-6" />
-        </button>
-      </div>
+    <div 
+      className="bg-secondary w-full p-4 text-white rounded-t-lg"
+      onTouchStart={(e) => {
+        const touch = e.touches[0];
+        const startX = touch.clientX;
+        
+        const handleTouchEnd = (e: TouchEvent) => {
+          const touch = e.changedTouches[0];
+          const endX = touch.clientX;
+          const diff = startX - endX;
+          
+          if (Math.abs(diff) > 50) {
+            handleSwipe(diff > 0 ? 'right' : 'left');
+          }
+        };
+        
+        document.addEventListener('touchend', handleTouchEnd, { once: true });
+      }}
+    >
       <div className="grid grid-cols-7 gap-4 text-center">
-        {days.map((day, index) => (
+        {days.map((day) => (
           <div key={day} className="font-semibold">
             {day}
           </div>
         ))}
         {weekDates.map((date, index) => (
-          <div key={index} className="text-lg">
+          <div 
+            key={index} 
+            className={`text-lg p-2 rounded-full ${date === today ? 'bg-white text-secondary' : ''}`}
+          >
             {date}
           </div>
         ))}
