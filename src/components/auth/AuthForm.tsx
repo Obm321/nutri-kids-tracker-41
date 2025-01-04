@@ -4,7 +4,11 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 
-export const AuthForm = () => {
+interface AuthFormProps {
+  onAuthSuccess: () => void;
+}
+
+export const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -17,6 +21,7 @@ export const AuthForm = () => {
       title: isLogin ? "Welcome back!" : "Account created successfully!",
       description: "You are now logged in.",
     });
+    onAuthSuccess();
   };
 
   return (

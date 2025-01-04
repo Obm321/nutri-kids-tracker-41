@@ -5,12 +5,12 @@ import { NutritionCard } from "@/components/dashboard/NutritionCard";
 import { ChildProfile } from "@/components/dashboard/ChildProfile";
 
 const Index = () => {
-  const [isAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-muted p-4">
-        <AuthForm />
+        <AuthForm onAuthSuccess={() => setIsAuthenticated(true)} />
       </div>
     );
   }
