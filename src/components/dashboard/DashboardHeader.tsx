@@ -1,19 +1,10 @@
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Camera } from "lucide-react";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { PlusCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { MealLogDialog } from "./MealLogDialog";
 
 export const DashboardHeader = () => {
-  const isMobile = useIsMobile();
   const { toast } = useToast();
-
-  const handleLogMeal = () => {
-    // In a real app, this would open the camera/image upload
-    toast({
-      title: "Meal Logging",
-      description: "Camera functionality will be implemented in the next phase.",
-    });
-  };
 
   const handleAddChild = () => {
     toast({
@@ -29,20 +20,13 @@ export const DashboardHeader = () => {
         <p className="text-sm sm:text-base text-muted-foreground">Track your child's nutrition</p>
       </div>
       <div className="flex gap-3">
-        <Button 
-          variant="outline" 
-          className="flex-1 sm:flex-initial items-center gap-2"
-          onClick={handleLogMeal}
-        >
-          <Camera className="w-4 h-4" />
-          {!isMobile && "Log Meal"}
-        </Button>
+        <MealLogDialog />
         <Button 
           className="flex-1 sm:flex-initial items-center gap-2"
           onClick={handleAddChild}
         >
           <PlusCircle className="w-4 h-4" />
-          {!isMobile && "Add Child"}
+          <span className="hidden sm:inline">Add Child</span>
         </Button>
       </div>
     </div>
