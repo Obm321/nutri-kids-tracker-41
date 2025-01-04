@@ -1,7 +1,12 @@
 import { useState, useRef } from "react";
 
-export const Calendar = () => {
-  const [currentDate, setCurrentDate] = useState(new Date());
+interface CalendarProps {
+  selectedDate?: Date;
+  onDateSelect?: (date: Date) => void;
+}
+
+export const Calendar = ({ selectedDate, onDateSelect }: CalendarProps) => {
+  const [currentDate, setCurrentDate] = useState(selectedDate || new Date());
   const isDraggingRef = useRef(false);
   const startXRef = useRef(0);
 
@@ -21,14 +26,20 @@ export const Calendar = () => {
     
     for (let i = 0; i < 7; i++) {
       const day = new Date(curr.setDate(first + i));
-      dates.push(day.getDate());
+      dates.push(day);
     }
     
     return dates;
   };
 
   const weekDates = getWeekDates(currentDate);
-  const today = new Date().getDate();
+  const today = new Date();
+
+  const isSameDay = (date1: Date, date2: Date) => {
+    return date1.getDate() === date2.getDate() &&
+           date1.getMonth() === date2.getMonth() &&
+           date1.getFullYear() === date2.getFullYear();
+  };
 
   return (
     <div 
@@ -75,10 +86,11 @@ export const Calendar = () => {
         {weekDates.map((date, index) => (
           <div 
             key={index} 
+            onClick={() => onDateSelect?.(date)}
             className={`text-lg p-2 rounded-full cursor-pointer transition-colors
-              ${date === today ? 'bg-white text-secondary' : 'hover:bg-white/10'}`}
+              ${isSameDay(date, selectedDate || today) ? 'bg-white text-secondary' : 'hover:bg-white/10'}`}
           >
-            {date}
+            {date.getDate()}
           </div>
         ))}
       </div>

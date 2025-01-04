@@ -33,17 +33,31 @@ const Index = () => {
       achievements: 0,
     };
     setChildren([...children, newChild]);
+    toast({
+      title: "Success",
+      description: "Child profile created successfully",
+    });
   };
 
   const handleEditChild = (childData: ChildData) => {
-    setChildren(children.map(child => 
-      child.id === childData.id ? childData : child
-    ));
+    const updatedChildren = children.map(child => 
+      child.id === childData.id ? { ...childData } : child
+    );
+    setChildren(updatedChildren);
     setEditingChild(null);
+    toast({
+      title: "Success",
+      description: "Child profile updated successfully",
+    });
   };
 
   const handleDeleteChild = (childId: string) => {
-    setChildren(children.filter(child => child.id !== childId));
+    const updatedChildren = children.filter(child => child.id !== childId);
+    setChildren(updatedChildren);
+    toast({
+      title: "Success",
+      description: "Child profile deleted successfully",
+    });
   };
 
   if (!isAuthenticated) {
