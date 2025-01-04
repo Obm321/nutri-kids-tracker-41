@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Award } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface ChildProfileProps {
   name: string;
@@ -9,6 +10,29 @@ interface ChildProfileProps {
 }
 
 export const ChildProfile = ({ name, age, achievements }: ChildProfileProps) => {
+  const { toast } = useToast();
+
+  const handleProgress = () => {
+    toast({
+      title: "Progress Tracking",
+      description: "Viewing progress charts will be available soon.",
+    });
+  };
+
+  const handleHistory = () => {
+    toast({
+      title: "Meal History",
+      description: "Viewing meal history will be available soon.",
+    });
+  };
+
+  const handleSettings = () => {
+    toast({
+      title: "Profile Settings",
+      description: "Profile settings will be available soon.",
+    });
+  };
+
   return (
     <Card className="p-4 sm:p-6 animate-fadeIn">
       <div className="flex items-center gap-3 sm:gap-4">
@@ -27,9 +51,27 @@ export const ChildProfile = ({ name, age, achievements }: ChildProfileProps) => 
         </div>
       </div>
       <div className="mt-4 grid grid-cols-3 gap-2 sm:gap-4">
-        <Button variant="outline" className="w-full text-sm sm:text-base">Progress</Button>
-        <Button variant="outline" className="w-full text-sm sm:text-base">History</Button>
-        <Button variant="outline" className="w-full text-sm sm:text-base">Settings</Button>
+        <Button 
+          variant="outline" 
+          className="w-full text-sm sm:text-base"
+          onClick={handleProgress}
+        >
+          Progress
+        </Button>
+        <Button 
+          variant="outline" 
+          className="w-full text-sm sm:text-base"
+          onClick={handleHistory}
+        >
+          History
+        </Button>
+        <Button 
+          variant="outline" 
+          className="w-full text-sm sm:text-base"
+          onClick={handleSettings}
+        >
+          Settings
+        </Button>
       </div>
     </Card>
   );
