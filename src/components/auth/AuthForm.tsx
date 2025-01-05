@@ -14,6 +14,7 @@ export const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
   const { toast } = useToast();
 
   const validateForm = () => {
@@ -80,6 +81,16 @@ export const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
         if (error) throw error;
 
         if (data?.user) {
+          if (!data.user.email_confirmed_at) {
+            toast({
+              title: "Email not verified",
+              description: "Please check your email and verify your account before logging in.",
+              variant: "destructive",
+            });
+            setLoading(false);
+            return;
+          }
+
           await createProfile(data.user.id, data.user.email || '');
           toast({
             title: "Welcome back!",
@@ -91,17 +102,19 @@ export const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
+          options: {
+            emailRedirectTo: window.location.origin,
+          }
         });
 
         if (error) throw error;
 
         if (data?.user) {
-          await createProfile(data.user.id, data.user.email || '');
+          setShowConfirmation(true);
           toast({
-            title: "Account created successfully!",
-            description: "You have been automatically logged in.",
+            title: "Verification email sent",
+            description: "Please check your email to verify your account.",
           });
-          onAuthSuccess();
         }
       }
     } catch (error: any) {
@@ -123,6 +136,30 @@ export const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
       setLoading(false);
     }
   };
+
+  if (showConfirmation) {
+    return (
+      <Card className="w-full max-w-md p-6 space-y-6 animate-fadeIn">
+        <div className="space-y-2 text-center">
+          <h1 className="text-3xl font-bold tracking-tight">Check Your Email</h1>
+          <p className="text-muted-foreground">
+            We've sent you a verification link to {email}. Please check your email and click the link to verify your account.
+          </p>
+          <Button
+            onClick={() => {
+              setShowConfirmation(false);
+              setIsLogin(true);
+              setEmail("");
+              setPassword("");
+            }}
+            className="mt-4"
+          >
+            Back to Login
+          </Button>
+        </div>
+      </Card>
+    );
+  }
 
   return (
     <Card className="w-full max-w-md p-6 space-y-6 animate-fadeIn">
