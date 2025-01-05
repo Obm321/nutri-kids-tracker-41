@@ -4,12 +4,16 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Camera, Upload } from "lucide-react";
 import { useState, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/lib/supabase";
+import { useParams } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface MealLogDialogProps {
   open: boolean;
@@ -23,6 +27,8 @@ export const MealLogDialog = ({ open, onOpenChange, mealType }: MealLogDialogPro
   const [showCamera, setShowCamera] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const { toast } = useToast();
+  const { id: childId } = useParams();
+  const queryClient = useQueryClient();
 
   const startCamera = async () => {
     try {
@@ -74,10 +80,10 @@ export const MealLogDialog = ({ open, onOpenChange, mealType }: MealLogDialogPro
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!mealName || !selectedFile) {
+    if (!mealName || !selectedFile || !childId || !mealType) {
       toast({
         title: "Missing Information",
         description: "Please provide both a meal name and photo.",
@@ -86,15 +92,61 @@ export const MealLogDialog = ({ open, onOpenChange, mealType }: MealLogDialogPro
       return;
     }
 
-    toast({
-      title: "Meal Logged Successfully",
-      description: `${mealName} has been logged.`,
-    });
+    try {
+      // Upload image to Supabase Storage
+      const fileExt = selectedFile.name.split('.').pop();
+      const fileName = `${Date.now()}.${fileExt}`;
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('meal-photos')
+        .upload(fileName, selectedFile);
 
-    setMealName("");
-    setSelectedFile(null);
-    stopCamera();
-    onOpenChange(false);
+      if (uploadError) throw uploadError;
+
+      // Get the public URL of the uploaded image
+      const { data: { publicUrl } } = supabase.storage
+        .from('meal-photos')
+        .getPublicUrl(fileName);
+
+      // Save meal data to the database
+      const { error: insertError } = await supabase
+        .from('meals')
+        .insert([
+          {
+            child_id: childId,
+            name: mealName,
+            type: mealType,
+            photo_url: publicUrl,
+            date: new Date().toISOString(),
+            // nutrition data will be added later when we implement the nutrition API
+            carbs: 0,
+            protein: 0,
+            fat: 0,
+            calories: 0,
+          }
+        ]);
+
+      if (insertError) throw insertError;
+
+      toast({
+        title: "Success",
+        description: `${mealName} has been logged.`,
+      });
+
+      // Invalidate queries to refresh the data
+      queryClient.invalidateQueries({ queryKey: ['meals', childId] });
+
+      setMealName("");
+      setSelectedFile(null);
+      stopCamera();
+      onOpenChange(false);
+    } catch (error) {
+      console.error('Error saving meal:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save meal information.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -102,6 +154,9 @@ export const MealLogDialog = ({ open, onOpenChange, mealType }: MealLogDialogPro
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Log {mealType} Meal</DialogTitle>
+          <DialogDescription>
+            Add details about your meal including a photo.
+          </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">

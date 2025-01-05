@@ -47,7 +47,7 @@ export const Calendar = ({ selectedDate, onDateSelect }: CalendarProps) => {
 
   return (
     <div 
-      className="bg-secondary w-full p-4 text-white select-none sticky top-0 z-50"
+      className="bg-secondary w-full p-4 text-white select-none"
       onMouseDown={(e) => {
         isDraggingRef.current = true;
         startXRef.current = e.clientX;

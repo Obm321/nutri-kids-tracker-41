@@ -8,6 +8,7 @@ import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { AddChildDialog } from "@/components/dashboard/AddChildDialog";
 import { AddChildColumn } from "@/components/dashboard/AddChildColumn";
 import { ChildProfile } from "@/components/dashboard/ChildProfile";
+import { Calendar } from "@/components/dashboard/Calendar";
 import type { Child } from "@/lib/supabase";
 
 const Index = () => {
@@ -15,6 +16,7 @@ const Index = () => {
   const [loading, setLoading] = useState(true);
   const [showAddChildDialog, setShowAddChildDialog] = useState(false);
   const [children, setChildren] = useState<Child[]>([]);
+  const [selectedDate, setSelectedDate] = useState(new Date());
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { data: profile, error: profileError } = useProfile();
@@ -127,6 +129,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-muted">
       <DashboardHeader />
+      <Calendar onDateSelect={setSelectedDate} selectedDate={selectedDate} />
       <div className="max-w-7xl mx-auto p-4">
         {profileError && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">

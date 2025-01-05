@@ -1,5 +1,5 @@
 import { Calendar } from "./Calendar";
-import { Plus } from "lucide-react";
+import { Plus, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MealLogDialog } from "./MealLogDialog";
 import { useState, useEffect } from "react";
@@ -13,6 +13,7 @@ export const ChildDashboard = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showMealLog, setShowMealLog] = useState(false);
   const [selectedMealType, setSelectedMealType] = useState<string | null>(null);
+  const [showMealTypeMenu, setShowMealTypeMenu] = useState(false);
 
   const { data: childData, isLoading } = useQuery({
     queryKey: ["child", id],
@@ -34,7 +35,6 @@ export const ChildDashboard = () => {
     },
   });
 
-  // Force a component remount when the ID changes
   useEffect(() => {
     console.log("Child ID changed:", id);
     if (!id) {
@@ -45,9 +45,14 @@ export const ChildDashboard = () => {
   const handleMealLog = (type?: string) => {
     setSelectedMealType(type || null);
     setShowMealLog(true);
+    setShowMealTypeMenu(false);
   };
 
-  const mealTypes = ["Breakfast", "Lunch", "Dinner", "Snack"];
+  const mealTypes = ["Breakfast", "Lunch", "Dinner", "Breakfast snack", "Afternoon snack", "Midnight snack"];
+
+  const handleAddMealColumn = () => {
+    setShowMealTypeMenu(true);
+  };
 
   if (isLoading || !childData) {
     return <div className="min-h-screen bg-muted flex items-center justify-center">Loading...</div>;
@@ -55,11 +60,23 @@ export const ChildDashboard = () => {
 
   return (
     <div className="min-h-screen bg-muted">
-      <Calendar onDateSelect={setSelectedDate} selectedDate={selectedDate} />
+      <div className="sticky top-0 z-50 bg-white shadow-sm">
+        <div className="flex items-center p-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate('/')}
+            className="mr-2"
+          >
+            <ArrowLeft className="h-6 w-6" />
+          </Button>
+          <h1 className="text-xl font-bold">{childData.name}'s Dashboard</h1>
+        </div>
+        <Calendar onDateSelect={setSelectedDate} selectedDate={selectedDate} />
+      </div>
 
       <main className="container px-4 py-6 space-y-6">
         <div className="bg-white rounded-lg p-4 shadow-sm">
-          <h2 className="text-xl font-bold mb-4">{childData.name}'s Dashboard</h2>
           <h3 className="text-lg mb-2">total intake 0 / 2851kcal</h3>
           <div className="space-y-4">
             <div>
@@ -118,10 +135,34 @@ export const ChildDashboard = () => {
 
       <Button
         className="fixed bottom-6 right-6 rounded-full h-12 w-12 p-0 shadow-lg bg-secondary hover:bg-secondary/90"
-        onClick={() => handleMealLog()}
+        onClick={handleAddMealColumn}
       >
         <Plus className="h-6 w-6" />
       </Button>
+
+      {showMealTypeMenu && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-4 w-80 space-y-2">
+            {mealTypes.map((type) => (
+              <Button
+                key={type}
+                variant="ghost"
+                className="w-full justify-start text-left"
+                onClick={() => handleMealLog(type.toLowerCase())}
+              >
+                {type}
+              </Button>
+            ))}
+            <Button
+              variant="ghost"
+              className="w-full justify-start text-left text-destructive"
+              onClick={() => setShowMealTypeMenu(false)}
+            >
+              Cancel
+            </Button>
+          </div>
+        </div>
+      )}
 
       {showMealLog && (
         <MealLogDialog
