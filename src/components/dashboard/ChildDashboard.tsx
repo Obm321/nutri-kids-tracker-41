@@ -6,16 +6,18 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
+import { useToast } from "@/hooks/use-toast";
 
 export const ChildDashboard = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showMealLog, setShowMealLog] = useState(false);
   const [selectedMealType, setSelectedMealType] = useState<string | null>(null);
   const [showMealTypeMenu, setShowMealTypeMenu] = useState(false);
 
-  const { data: childData, isLoading } = useQuery({
+  const { data: childData, isLoading, error } = useQuery({
     queryKey: ["child", id],
     queryFn: async () => {
       if (!id) {
@@ -27,20 +29,30 @@ export const ChildDashboard = () => {
         .from("children")
         .select("*")
         .eq("id", id)
-        .single();
+        .maybeSingle(); // Using maybeSingle() instead of single()
 
       if (error) throw error;
+      if (!data) {
+        throw new Error("Child not found");
+      }
       console.log("Child data:", data);
       return data;
     },
+    retry: false, // Don't retry if child not found
   });
 
   useEffect(() => {
-    console.log("Child ID changed:", id);
-    if (!id) {
-      navigate('/');
+    if (error) {
+      console.error("Error fetching child:", error);
+      toast({
+        title: "Error",
+        description: "Child not found. Redirecting to dashboard...",
+        variant: "destructive",
+      });
+      // Redirect after a short delay so user can see the message
+      setTimeout(() => navigate('/'), 2000);
     }
-  }, [id, navigate]);
+  }, [error, navigate, toast]);
 
   const handleMealLog = (type?: string) => {
     setSelectedMealType(type || null);
@@ -54,8 +66,12 @@ export const ChildDashboard = () => {
     setShowMealTypeMenu(true);
   };
 
-  if (isLoading || !childData) {
+  if (isLoading) {
     return <div className="min-h-screen bg-muted flex items-center justify-center">Loading...</div>;
+  }
+
+  if (error || !childData) {
+    return <div className="min-h-screen bg-muted flex items-center justify-center">Child not found</div>;
   }
 
   return (
