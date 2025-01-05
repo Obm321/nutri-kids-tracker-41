@@ -19,15 +19,15 @@ export const useProfile = () => {
         throw new Error("Not authenticated");
       }
 
-      console.log("Authenticated user:", session.user.id);
+      console.log("Fetching profile for user:", session.user.id);
 
       try {
         // Try to fetch existing profile first
         const { data: existingProfile, error: fetchError } = await supabase
           .from("profiles")
-          .select()
+          .select("*")
           .eq("id", session.user.id)
-          .single();
+          .maybeSingle();
 
         if (fetchError) {
           console.error("Error fetching profile:", fetchError);
@@ -39,17 +39,17 @@ export const useProfile = () => {
           return existingProfile;
         }
 
+        console.log("No existing profile found, creating new one");
+
         // If no profile exists, create one
         const { data: newProfile, error: createError } = await supabase
           .from("profiles")
-          .upsert({
+          .insert([{
             id: session.user.id,
             email: session.user.email,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
-          }, {
-            onConflict: 'id'
-          })
+          }])
           .select()
           .single();
 
