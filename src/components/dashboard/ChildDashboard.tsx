@@ -185,6 +185,7 @@ export const ChildDashboard = () => {
           open={showMealLog}
           onOpenChange={setShowMealLog}
           mealType={selectedMealType}
+          selectedDate={selectedDate}
         />
       )}
     </div>

@@ -7,11 +7,13 @@ export const MealService = {
     name,
     type,
     photoFile,
+    dateTime,
   }: {
     childId: string;
     name: string;
     type: string;
     photoFile: File;
+    dateTime: Date;
   }) {
     try {
       const photoUrl = await StorageService.uploadFile('meal-photos', photoFile);
@@ -24,7 +26,7 @@ export const MealService = {
             name,
             type,
             photo_url: photoUrl,
-            date: new Date().toISOString(),
+            date: dateTime.toISOString(),
             carbs: 0,
             protein: 0,
             fat: 0,
