@@ -10,7 +10,7 @@ interface AuthFormProps {
 }
 
 export const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
-  const [isLogin, setIsLogin] = useState(true); // Default to login view
+  const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -103,23 +103,28 @@ export const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
           onAuthSuccess();
         }
       } else {
-        // Sign up flow
+        // Sign up flow - modified to auto-sign in after signup
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
+          options: {
+            emailRedirectTo: window.location.origin,
+            data: {
+              email: email,
+            }
+          }
         });
 
         if (error) throw error;
 
         if (data?.user) {
+          // Create profile immediately after signup
+          await createProfile(data.user.id, data.user.email || '');
           toast({
             title: "Account created successfully!",
-            description: "Please check your email to verify your account, then login.",
+            description: "You have been automatically logged in.",
           });
-          // Switch to login view after successful registration
-          setIsLogin(true);
-          setEmail("");
-          setPassword("");
+          onAuthSuccess();
         }
       }
     } catch (error: any) {
