@@ -6,7 +6,6 @@ export const useProfile = () => {
   return useQuery({
     queryKey: ["profile"],
     queryFn: async (): Promise<Profile> => {
-      // Wait for auth state to be initialized
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       
       if (sessionError) {
@@ -22,50 +21,29 @@ export const useProfile = () => {
       console.log("Fetching profile for user:", session.user.id);
 
       try {
-        // Try to fetch existing profile first
-        const { data: existingProfile, error: fetchError } = await supabase
+        const { data: profile, error: profileError } = await supabase
           .from("profiles")
           .select("*")
           .eq("id", session.user.id)
           .maybeSingle();
 
-        if (fetchError) {
-          console.error("Error fetching profile:", fetchError);
-          throw fetchError;
+        if (profileError) {
+          console.error("Error fetching profile:", profileError);
+          throw profileError;
         }
 
-        if (existingProfile) {
-          console.log("Found existing profile:", existingProfile);
-          return existingProfile;
+        if (!profile) {
+          console.error("Profile not found");
+          throw new Error("Profile not found");
         }
 
-        console.log("No existing profile found, creating new one");
-
-        // If no profile exists, create one
-        const { data: newProfile, error: createError } = await supabase
-          .from("profiles")
-          .insert([{
-            id: session.user.id,
-            email: session.user.email,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          }])
-          .select()
-          .single();
-
-        if (createError) {
-          console.error("Error creating profile:", createError);
-          throw createError;
-        }
-
-        console.log("Created new profile:", newProfile);
-        return newProfile;
+        return profile;
       } catch (error) {
         console.error("Profile operation failed:", error);
         throw error;
       }
     },
-    retry: false, // Don't retry on failure
+    retry: false,
     staleTime: 1000 * 60 * 5, // Cache for 5 minutes
   });
 };

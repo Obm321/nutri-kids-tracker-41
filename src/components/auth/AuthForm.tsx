@@ -10,7 +10,7 @@ interface AuthFormProps {
 }
 
 export const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
-  const [isLogin, setIsLogin] = useState(false);
+  const [isLogin, setIsLogin] = useState(true); // Default to login view
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -37,37 +37,43 @@ export const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
   };
 
   const createProfile = async (userId: string, userEmail: string) => {
-    // Add a small delay to ensure session is properly initialized
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    const { data: { session } } = await supabase.auth.getSession();
-    console.log("Current session before profile creation:", session);
-    
-    if (!session) {
-      console.error("No session available for profile creation");
-      return;
-    }
-
     try {
-      const { error: profileError } = await supabase
+      const { data: existingProfile, error: fetchError } = await supabase
         .from("profiles")
-        .upsert({
+        .select("*")
+        .eq("id", userId)
+        .maybeSingle();
+
+      if (fetchError) {
+        console.error("Error checking existing profile:", fetchError);
+        throw fetchError;
+      }
+
+      if (existingProfile) {
+        console.log("Profile already exists:", existingProfile);
+        return existingProfile;
+      }
+
+      const { data: newProfile, error: createError } = await supabase
+        .from("profiles")
+        .insert([{
           id: userId,
           email: userEmail,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
-        }, {
-          onConflict: 'id'
-        });
+        }])
+        .select()
+        .single();
 
-      if (profileError) {
-        console.error("Error creating profile:", profileError);
-        throw profileError;
+      if (createError) {
+        console.error("Error creating profile:", createError);
+        throw createError;
       }
-      
-      console.log("Profile created successfully for user:", userId);
+
+      console.log("Profile created successfully:", newProfile);
+      return newProfile;
     } catch (error) {
-      console.error("Profile creation failed:", error);
+      console.error("Profile operation failed:", error);
       throw error;
     }
   };
@@ -80,6 +86,7 @@ export const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
 
     try {
       if (isLogin) {
+        // Login flow
         const { data, error } = await supabase.auth.signInWithPassword({
           email,
           password,
@@ -88,9 +95,7 @@ export const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
         if (error) throw error;
 
         if (data?.user) {
-          // Create/update profile after successful login
           await createProfile(data.user.id, data.user.email || '');
-          
           toast({
             title: "Welcome back!",
             description: "You have successfully logged in.",
@@ -107,23 +112,14 @@ export const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
         if (error) throw error;
 
         if (data?.user) {
-          // After successful registration, automatically log in the user
-          const { error: signInError } = await supabase.auth.signInWithPassword({
-            email,
-            password,
-          });
-
-          if (signInError) throw signInError;
-
-          // Create profile after successful login
-          await createProfile(data.user.id, data.user.email || '');
-          
           toast({
             title: "Account created successfully!",
-            description: "You have been automatically logged in.",
+            description: "Please check your email to verify your account, then login.",
           });
-          
-          onAuthSuccess();
+          // Switch to login view after successful registration
+          setIsLogin(true);
+          setEmail("");
+          setPassword("");
         }
       }
     } catch (error: any) {
@@ -185,7 +181,11 @@ export const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
       <div className="text-center">
         <button
           type="button"
-          onClick={() => setIsLogin(!isLogin)}
+          onClick={() => {
+            setIsLogin(!isLogin);
+            setEmail("");
+            setPassword("");
+          }}
           className="text-sm text-primary hover:underline"
         >
           {isLogin ? "Need an account? Sign up" : "Already have an account? Sign in"}
