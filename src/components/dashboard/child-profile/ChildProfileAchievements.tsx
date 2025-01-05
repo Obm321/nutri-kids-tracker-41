@@ -19,25 +19,46 @@ export const ChildProfileAchievements = ({ childId }: ChildProfileAchievementsPr
   const nutrition = calculateDailyNutrition(mealsData || []);
 
   return (
-    <>
-      <div className="grid grid-cols-3 gap-2 mb-4">
-        <div className="bg-[#FCD34D] rounded-lg p-2 text-center">
-          <span className="text-sm font-medium">C</span>
-          <span className="block text-lg font-bold">{Math.round(nutrition.carbs)}/463g</span>
+    <div className="bg-white rounded-lg p-4 shadow-sm">
+      <h3 className="text-lg mb-2">total intake {nutrition.calories}/2851kcal</h3>
+      <div className="space-y-4">
+        <div>
+          <div className="flex justify-between mb-1">
+            <span>Carbohydrate</span>
+            <span className="text-sm">{Math.round(nutrition.carbs)}/463g</span>
+          </div>
+          <div className="h-2 bg-gray-200 rounded">
+            <div 
+              className="h-full bg-[#FCD34D] rounded" 
+              style={{ width: `${Math.min((nutrition.carbs / 463) * 100, 100)}%` }}
+            />
+          </div>
         </div>
-        <div className="bg-[#4ADE80] rounded-lg p-2 text-center">
-          <span className="text-sm font-medium">P</span>
-          <span className="block text-lg font-bold">{Math.round(nutrition.protein)}/143g</span>
+        <div>
+          <div className="flex justify-between mb-1">
+            <span>Protein</span>
+            <span className="text-sm">{Math.round(nutrition.protein)}/143g</span>
+          </div>
+          <div className="h-2 bg-gray-200 rounded">
+            <div 
+              className="h-full bg-[#4ADE80] rounded" 
+              style={{ width: `${Math.min((nutrition.protein / 143) * 100, 100)}%` }}
+            />
+          </div>
         </div>
-        <div className="bg-[#60A5FA] rounded-lg p-2 text-center">
-          <span className="text-sm font-medium">F</span>
-          <span className="block text-lg font-bold">{Math.round(nutrition.fat)}/86g</span>
+        <div>
+          <div className="flex justify-between mb-1">
+            <span>Fat</span>
+            <span className="text-sm">{Math.round(nutrition.fat)}/86g</span>
+          </div>
+          <div className="h-2 bg-gray-200 rounded">
+            <div 
+              className="h-full bg-[#60A5FA] rounded" 
+              style={{ width: `${Math.min((nutrition.fat / 86) * 100, 100)}%` }}
+            />
+          </div>
         </div>
       </div>
-
-      <div className="text-center text-sm text-muted-foreground">
-        {Math.round(nutrition.calories)}/2851 kcal today
-      </div>
-    </>
+    </div>
   );
 };
