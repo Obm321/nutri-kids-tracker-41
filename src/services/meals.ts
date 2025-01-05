@@ -25,19 +25,15 @@ export const MealService = {
 
       // Get nutrition information from Spoonacular
       console.log('Analyzing meal nutrition...');
-      const response = await fetch('/functions/analyze-meal', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ mealName: name })
+      const { data: nutritionData, error: nutritionError } = await supabase.functions.invoke('analyze-meal', {
+        body: { mealName: name }
       });
 
-      if (!response.ok) {
+      if (nutritionError) {
+        console.error('Error analyzing nutrition:', nutritionError);
         throw new Error('Failed to analyze meal nutrition');
       }
 
-      const nutritionData = await response.json();
       console.log('Nutrition data:', nutritionData);
 
       // Then create the meal record with nutrition data
