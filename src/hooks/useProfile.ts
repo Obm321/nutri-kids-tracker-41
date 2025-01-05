@@ -6,44 +6,54 @@ export const useProfile = () => {
   return useQuery({
     queryKey: ["profile"],
     queryFn: async (): Promise<Profile> => {
-      const { data: { user } } = await supabase.auth.getUser();
+      // First check if we have an authenticated user
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
       
-      if (!user) throw new Error("Not authenticated");
+      if (authError || !user) {
+        console.error("Authentication error:", authError);
+        throw new Error("Not authenticated");
+      }
 
-      console.log("Fetching profile for user:", user.id);
+      console.log("Authenticated user:", user.id);
 
-      // Attempt to create/update profile first to handle race conditions
-      const { data: profile, error: upsertError } = await supabase
-        .from("profiles")
-        .upsert({
-          id: user.id,
-          email: user.email,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        })
-        .select()
-        .single();
-
-      if (upsertError) {
-        console.error("Error upserting profile:", upsertError);
-        
-        // If upsert fails, try to fetch existing profile
+      try {
+        // Try to fetch existing profile first
         const { data: existingProfile, error: fetchError } = await supabase
           .from("profiles")
           .select()
           .eq("id", user.id)
           .single();
 
-        if (fetchError) {
-          console.error("Error fetching profile:", fetchError);
-          throw fetchError;
+        if (existingProfile) {
+          console.log("Found existing profile:", existingProfile);
+          return existingProfile;
         }
 
-        return existingProfile;
-      }
+        // If no profile exists, create one
+        const { data: newProfile, error: createError } = await supabase
+          .from("profiles")
+          .insert([
+            {
+              id: user.id,
+              email: user.email,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+            }
+          ])
+          .select()
+          .single();
 
-      console.log("Profile upserted successfully:", profile);
-      return profile;
+        if (createError) {
+          console.error("Error creating profile:", createError);
+          throw createError;
+        }
+
+        console.log("Created new profile:", newProfile);
+        return newProfile;
+      } catch (error) {
+        console.error("Profile operation failed:", error);
+        throw error;
+      }
     },
     retry: 1,
   });
