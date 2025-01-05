@@ -38,23 +38,7 @@ export const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
 
   const createProfile = async (userId: string, userEmail: string) => {
     try {
-      const { data: existingProfile, error: fetchError } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", userId)
-        .single();
-
-      if (fetchError && fetchError.code !== 'PGRST116') {
-        console.error("Error checking existing profile:", fetchError);
-        throw fetchError;
-      }
-
-      if (existingProfile) {
-        console.log("Profile already exists:", existingProfile);
-        return existingProfile;
-      }
-
-      const { data: newProfile, error: createError } = await supabase
+      const { data: profile, error: upsertError } = await supabase
         .from("profiles")
         .upsert([
           {
@@ -67,13 +51,13 @@ export const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
         .select()
         .single();
 
-      if (createError) {
-        console.error("Error creating profile:", createError);
-        throw createError;
+      if (upsertError) {
+        console.error("Error creating/updating profile:", upsertError);
+        throw upsertError;
       }
 
-      console.log("Profile created successfully:", newProfile);
-      return newProfile;
+      console.log("Profile created/updated successfully:", profile);
+      return profile;
     } catch (error) {
       console.error("Profile operation failed:", error);
       throw error;
