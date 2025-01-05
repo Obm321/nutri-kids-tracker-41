@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import { AuthForm } from "@/components/auth/AuthForm";
-import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useProfile } from "@/hooks/useProfile";
 import { supabase } from "@/lib/supabase";
 import { useQueryClient } from "@tanstack/react-query";
+import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 
 const Index = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -19,7 +19,6 @@ const Index = () => {
       console.log("Auth state changed:", _event, session);
       setIsAuthenticated(!!session);
       if (session) {
-        // Invalidate and refetch profile data when session changes
         queryClient.invalidateQueries({ queryKey: ["profile"] });
       }
     });
@@ -39,25 +38,6 @@ const Index = () => {
     }
   };
 
-  const handleLogout = async () => {
-    try {
-      await supabase.auth.signOut();
-      // Clear all React Query cache
-      queryClient.clear();
-      setIsAuthenticated(false);
-      toast({
-        title: "Logged out successfully",
-        description: "You have been logged out of your account",
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to log out",
-        variant: "destructive",
-      });
-    }
-  };
-
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   }
@@ -71,25 +51,15 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-muted p-4">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-6">
-          <div>
-            <h1 className="text-2xl font-bold">Welcome{profile?.email ? `, ${profile.email}` : ''}</h1>
-          </div>
-          <Button 
-            variant="outline" 
-            onClick={handleLogout}
-            className="bg-red-500 text-white hover:bg-red-600"
-          >
-            Logout
-          </Button>
-        </div>
+    <div className="min-h-screen bg-muted">
+      <DashboardHeader />
+      <div className="max-w-7xl mx-auto p-4">
         {profileError && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
             Error loading profile: {profileError.message}
           </div>
         )}
+        {/* Parent dashboard content will go here */}
       </div>
     </div>
   );
