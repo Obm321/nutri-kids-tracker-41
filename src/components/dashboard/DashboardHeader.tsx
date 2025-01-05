@@ -56,6 +56,7 @@ export const DashboardHeader = () => {
         open={showMealLog}
         onOpenChange={setShowMealLog}
         mealType={selectedMealType}
+        selectedDate={new Date()} // Adding the missing selectedDate prop
       />
     </div>
   );
