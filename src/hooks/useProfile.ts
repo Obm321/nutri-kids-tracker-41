@@ -12,49 +12,38 @@ export const useProfile = () => {
 
       console.log("Fetching profile for user:", user.id);
 
-      try {
-        // First try to get existing profile
+      // Attempt to create/update profile first to handle race conditions
+      const { data: profile, error: upsertError } = await supabase
+        .from("profiles")
+        .upsert({
+          id: user.id,
+          email: user.email,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .select()
+        .single();
+
+      if (upsertError) {
+        console.error("Error upserting profile:", upsertError);
+        
+        // If upsert fails, try to fetch existing profile
         const { data: existingProfile, error: fetchError } = await supabase
           .from("profiles")
-          .select("*")
+          .select()
           .eq("id", user.id)
           .single();
 
         if (fetchError) {
-          if (fetchError.code === "PGRST116") {
-            console.log("No profile found, creating new profile");
-            
-            // Create new profile if none exists
-            const { data: newProfile, error: createError } = await supabase
-              .from("profiles")
-              .upsert({
-                id: user.id,
-                email: user.email,
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString(),
-              })
-              .select()
-              .single();
-
-            if (createError) {
-              console.error("Error creating profile:", createError);
-              throw createError;
-            }
-
-            console.log("Created new profile:", newProfile);
-            return newProfile;
-          }
-          
           console.error("Error fetching profile:", fetchError);
           throw fetchError;
         }
 
-        console.log("Found existing profile:", existingProfile);
         return existingProfile;
-      } catch (error) {
-        console.error("Profile operation failed:", error);
-        throw error;
       }
+
+      console.log("Profile upserted successfully:", profile);
+      return profile;
     },
     retry: 1,
   });
