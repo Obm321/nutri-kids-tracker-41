@@ -8,6 +8,9 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { MealService } from "@/services/meals";
+import { calculateDailyNutrition } from "@/utils/nutritionCalculations";
+import { NutritionSummary } from "./NutritionSummary";
+import { MealCard } from "./MealCard";
 
 export const ChildDashboard = () => {
   const { id } = useParams();
@@ -72,10 +75,6 @@ export const ChildDashboard = () => {
     setShowMealTypeMenu(true);
   };
 
-  const getMealByType = (type: string) => {
-    return mealsData?.find(meal => meal.type.toLowerCase() === type.toLowerCase());
-  };
-
   if (childLoading) {
     return <div className="min-h-screen bg-muted flex items-center justify-center">Loading...</div>;
   }
@@ -83,6 +82,8 @@ export const ChildDashboard = () => {
   if (childError || !childData) {
     return <div className="min-h-screen bg-muted flex items-center justify-center">Child not found</div>;
   }
+
+  const dailyNutrition = calculateDailyNutrition(mealsData || []);
 
   return (
     <div className="min-h-screen bg-muted">
@@ -102,79 +103,16 @@ export const ChildDashboard = () => {
       </div>
 
       <main className="container px-4 py-6 space-y-6">
-        <div className="bg-white rounded-lg p-4 shadow-sm">
-          <h3 className="text-lg mb-2">total intake 0 / 2851kcal</h3>
-          <div className="space-y-4">
-            <div>
-              <div className="flex justify-between mb-1">
-                <span>Carbohydrate</span>
-                <span>0/463g</span>
-              </div>
-              <div className="h-2 bg-gray-200 rounded">
-                <div className="h-full bg-[#FCD34D] rounded" style={{ width: '0%' }}></div>
-              </div>
-            </div>
-            <div>
-              <div className="flex justify-between mb-1">
-                <span>Protein</span>
-                <span>0/143g</span>
-              </div>
-              <div className="h-2 bg-gray-200 rounded">
-                <div className="h-full bg-[#4ADE80] rounded" style={{ width: '0%' }}></div>
-              </div>
-            </div>
-            <div>
-              <div className="flex justify-between mb-1">
-                <span>Fat</span>
-                <span>0/86g</span>
-              </div>
-              <div className="h-2 bg-gray-200 rounded">
-                <div className="h-full bg-[#60A5FA] rounded" style={{ width: '0%' }}></div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <NutritionSummary nutrition={dailyNutrition} showTotal />
 
-        {mealTypes.map((mealType) => {
-          const meal = getMealByType(mealType);
-          return (
-            <div key={mealType} className="bg-white rounded-lg p-4 shadow-sm">
-              <div className="flex justify-between items-center mb-2">
-                <div className="flex items-center gap-2">
-                  <h3 className="font-medium">{mealType}</h3>
-                  <span className="text-sm text-muted-foreground">0kcal</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <span className="text-[#FCD34D]">C 0g</span>
-                  <span className="text-[#4ADE80]">P 0g</span>
-                  <span className="text-[#60A5FA]">F 0g</span>
-                </div>
-              </div>
-              <div 
-                className="h-32 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:bg-muted/80 transition-colors overflow-hidden"
-                onClick={() => handleMealLog(mealType.toLowerCase())}
-              >
-                {meal?.photo_url ? (
-                  <div className="w-full h-full relative">
-                    <img 
-                      src={meal.photo_url} 
-                      alt={meal.name}
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
-                      <span className="text-white font-medium">{meal.name}</span>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="bg-muted w-full h-full flex flex-col items-center justify-center">
-                    <span className="text-4xl mb-2">☺</span>
-                    <span className="text-muted-foreground">Please Record your diet information!</span>
-                  </div>
-                )}
-              </div>
-            </div>
-          );
-        })}
+        {mealTypes.map((mealType) => (
+          <MealCard
+            key={mealType}
+            mealType={mealType}
+            meals={mealsData || []}
+            onMealLog={handleMealLog}
+          />
+        ))}
       </main>
 
       <Button
