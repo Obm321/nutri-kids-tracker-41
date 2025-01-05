@@ -9,22 +9,21 @@ export const StorageService = {
       
       if (!bucketExists) {
         // Create new bucket if it doesn't exist
-        const { error: createError } = await supabase.storage
-          .createBucket(bucketName, {
-            public: true,
-            fileSizeLimit: 1024 * 1024 * 2, // 2MB limit
-            allowedMimeTypes: ['image/jpeg', 'image/png', 'image/gif']
-          });
+        const { error: createError } = await supabase.storage.createBucket(bucketName, {
+          public: false // Set to false initially
+        });
           
         if (createError) throw createError;
       }
 
-      // Update bucket to be public
-      const { error: policyError } = await supabase.storage.updateBucket(bucketName, {
-        public: true
+      // Set bucket to be public and configure CORS
+      const { error: updateError } = await supabase.storage.updateBucket(bucketName, {
+        public: false,
+        fileSizeLimit: 1024 * 1024 * 2, // 2MB limit
+        allowedMimeTypes: ['image/jpeg', 'image/png', 'image/gif']
       });
       
-      if (policyError) throw policyError;
+      if (updateError) throw updateError;
       
     } catch (error) {
       console.error('Storage bucket error:', error);
