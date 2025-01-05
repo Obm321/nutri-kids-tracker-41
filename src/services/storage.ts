@@ -9,7 +9,9 @@ export const StorageService = {
       
       if (!bucketExists) {
         // Create new bucket if it doesn't exist
-        const { error: createError } = await supabase.storage.createBucket(bucketName);
+        const { error: createError } = await supabase.storage.createBucket(bucketName, {
+          public: true // Make bucket public
+        });
         if (createError) throw createError;
       }
 
@@ -61,17 +63,24 @@ export const StorageService = {
 -- Enable RLS
 ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY;
 
--- Create policy to allow authenticated users to upload files
+-- Create policy to allow authenticated uploads
 CREATE POLICY "Allow authenticated uploads" 
 ON storage.objects 
 FOR INSERT 
 TO authenticated 
-WITH CHECK (bucket_id = 'your-bucket-name');
+USING ( bucket_id = 'meals' );
 
--- Create policy to allow authenticated users to read files
+-- Create policy to allow authenticated downloads
 CREATE POLICY "Allow authenticated downloads" 
 ON storage.objects 
 FOR SELECT 
 TO authenticated 
-USING (bucket_id = 'your-bucket-name');
+USING ( bucket_id = 'meals' );
+
+-- Create policy to allow public downloads if needed
+CREATE POLICY "Allow public downloads" 
+ON storage.objects 
+FOR SELECT 
+TO anon 
+USING ( bucket_id = 'meals' AND auth.role() = 'anon' );
 */
