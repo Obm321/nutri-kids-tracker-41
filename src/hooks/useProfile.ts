@@ -24,22 +24,20 @@ export const useProfile = () => {
           .eq("id", user.id)
           .single();
 
-        if (existingProfile) {
+        if (!fetchError && existingProfile) {
           console.log("Found existing profile:", existingProfile);
           return existingProfile;
         }
 
-        // If no profile exists, create one
+        // If no profile exists or there was an error fetching, try to create one
         const { data: newProfile, error: createError } = await supabase
           .from("profiles")
-          .insert([
-            {
-              id: user.id,
-              email: user.email,
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString(),
-            }
-          ])
+          .upsert({
+            id: user.id,
+            email: user.email,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          })
           .select()
           .single();
 
