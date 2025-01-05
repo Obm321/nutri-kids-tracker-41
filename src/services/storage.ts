@@ -10,14 +10,14 @@ export const StorageService = {
       if (!bucketExists) {
         // Create new bucket if it doesn't exist
         const { error: createError } = await supabase.storage.createBucket(bucketName, {
-          public: false // Keep bucket private for security
+          public: true // Make bucket public for now to debug
         });
         if (createError) throw createError;
       }
 
       // Update bucket configuration
       const { error: updateError } = await supabase.storage.updateBucket(bucketName, {
-        public: false,
+        public: true, // Make bucket public for now to debug
         fileSizeLimit: 1024 * 1024 * 2, // 2MB limit
         allowedMimeTypes: ['image/jpeg', 'image/png', 'image/gif']
       });
@@ -63,25 +63,25 @@ export const StorageService = {
 -- Enable RLS
 ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY;
 
--- Create policy to allow authenticated uploads
-CREATE POLICY "authenticated_uploads" 
+-- Create policy to allow all uploads
+CREATE POLICY "allow_public_uploads" 
 ON storage.objects 
 FOR INSERT 
-TO authenticated 
-USING ( bucket_id = 'meals' );
+TO public
+USING ( bucket_id = 'meal-photos' );
 
--- Create policy to allow authenticated downloads
-CREATE POLICY "authenticated_downloads" 
+-- Create policy to allow all downloads
+CREATE POLICY "allow_public_downloads" 
 ON storage.objects 
 FOR SELECT 
-TO authenticated 
-USING ( bucket_id = 'meals' );
+TO public
+USING ( bucket_id = 'meal-photos' );
 
--- Create policy to allow authenticated deletes
-CREATE POLICY "authenticated_deletes" 
+-- Create policy to allow all deletes
+CREATE POLICY "allow_public_deletes" 
 ON storage.objects 
 FOR DELETE 
-TO authenticated 
-USING ( bucket_id = 'meals' );
+TO public
+USING ( bucket_id = 'meal-photos' );
 
 */
