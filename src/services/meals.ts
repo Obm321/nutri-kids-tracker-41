@@ -70,28 +70,34 @@ export const MealService = {
   },
 
   async getMealsByChildAndDate(childId: string, date: Date) {
-    console.log('Fetching meals for child:', childId, 'date:', date);
-    
-    const startOfDay = new Date(date);
-    startOfDay.setHours(0, 0, 0, 0);
-    
-    const endOfDay = new Date(date);
-    endOfDay.setHours(23, 59, 59, 999);
+    try {
+      console.log('Fetching meals for child:', childId, 'date:', date);
+      
+      const startOfDay = new Date(date);
+      startOfDay.setHours(0, 0, 0, 0);
+      
+      const endOfDay = new Date(date);
+      endOfDay.setHours(23, 59, 59, 999);
 
-    const { data, error } = await supabase
-      .from('meals')
-      .select('*')
-      .eq('child_id', childId)
-      .gte('date', startOfDay.toISOString())
-      .lte('date', endOfDay.toISOString())
-      .order('date', { ascending: true });
+      const { data, error } = await supabase
+        .from('meals')
+        .select('*')
+        .eq('child_id', childId)
+        .gte('date', startOfDay.toISOString())
+        .lte('date', endOfDay.toISOString())
+        .order('date', { ascending: true });
 
-    if (error) {
-      console.error('Error fetching meals:', error);
-      throw error;
+      if (error) {
+        console.error('Error fetching meals:', error);
+        throw error;
+      }
+
+      console.log('Fetched meals:', data);
+      return data || [];
+    } catch (error) {
+      console.error('Error in getMealsByChildAndDate:', error);
+      // Return empty array instead of throwing to prevent UI crashes
+      return [];
     }
-
-    console.log('Fetched meals:', data);
-    return data;
   }
 };
