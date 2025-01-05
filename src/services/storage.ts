@@ -3,21 +3,27 @@ import { supabase } from "@/lib/supabase";
 export const StorageService = {
   async ensureBucket(bucketName: string) {
     try {
+      // First check if bucket exists
       const { data: buckets } = await supabase.storage.listBuckets();
       const bucketExists = buckets?.some(bucket => bucket.name === bucketName);
       
       if (!bucketExists) {
+        // Create new bucket if it doesn't exist
         const { error: createError } = await supabase.storage
           .createBucket(bucketName, {
             public: true,
-            fileSizeLimit: 1024 * 1024 * 2 // 2MB
+            fileSizeLimit: 1024 * 1024 * 2, // 2MB limit
+            allowedMimeTypes: ['image/jpeg', 'image/png', 'image/gif']
           });
           
         if (createError) throw createError;
       }
+
+      // Update bucket policies to allow authenticated uploads
+      const { error: policyError } = await supabase.storage.from(bucketName).update({
+        public: true
+      });
       
-      // Set bucket policy to allow authenticated users to upload
-      const { error: policyError } = await supabase.storage.from(bucketName).createSignedUploadUrl('policy.txt');
       if (policyError) throw policyError;
       
     } catch (error) {
@@ -33,7 +39,7 @@ export const StorageService = {
       const fileExt = file.name.split('.').pop();
       const fileName = `${Date.now()}.${fileExt}`;
       
-      const { error: uploadError } = await supabase.storage
+      const { error: uploadError, data } = await supabase.storage
         .from(bucketName)
         .upload(fileName, file, {
           upsert: true,
