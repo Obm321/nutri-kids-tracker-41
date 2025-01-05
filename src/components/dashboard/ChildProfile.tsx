@@ -56,8 +56,7 @@ export const ChildProfile = ({
   const handleCardClick = () => {
     if (id) {
       console.log("Navigating to child:", id);
-      // Force a page reload after navigation
-      window.location.href = `/child/${id}`;
+      navigate(`/child/${id}`);
     }
   };
 

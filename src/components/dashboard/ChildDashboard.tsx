@@ -3,12 +3,13 @@ import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MealLogDialog } from "./MealLogDialog";
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 
 export const ChildDashboard = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showMealLog, setShowMealLog] = useState(false);
   const [selectedMealType, setSelectedMealType] = useState<string | null>(null);
@@ -16,7 +17,10 @@ export const ChildDashboard = () => {
   const { data: childData, isLoading } = useQuery({
     queryKey: ["child", id],
     queryFn: async () => {
-      if (!id) throw new Error("No child ID provided");
+      if (!id) {
+        navigate('/');
+        throw new Error("No child ID provided");
+      }
       console.log("Fetching child data for ID:", id);
       const { data, error } = await supabase
         .from("children")
@@ -33,7 +37,10 @@ export const ChildDashboard = () => {
   // Force a component remount when the ID changes
   useEffect(() => {
     console.log("Child ID changed:", id);
-  }, [id]);
+    if (!id) {
+      navigate('/');
+    }
+  }, [id, navigate]);
 
   const handleMealLog = (type?: string) => {
     setSelectedMealType(type || null);
