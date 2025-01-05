@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useParams } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
@@ -30,13 +30,23 @@ export const MealLogDialog = ({
 }: MealLogDialogProps) => {
   const [mealName, setMealName] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [mealDateTime, setMealDateTime] = useState<string>(
-    new Date(selectedDate).toISOString().slice(0, 16)
-  );
+  const [mealDateTime, setMealDateTime] = useState<string>("");
   
   const { toast } = useToast();
   const { id: childId } = useParams();
   const queryClient = useQueryClient();
+
+  // Update mealDateTime whenever selectedDate changes
+  useEffect(() => {
+    if (selectedDate) {
+      const localDate = new Date(selectedDate);
+      // Set the time to the current time
+      const now = new Date();
+      localDate.setHours(now.getHours());
+      localDate.setMinutes(now.getMinutes());
+      setMealDateTime(localDate.toISOString().slice(0, 16));
+    }
+  }, [selectedDate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,7 +74,9 @@ export const MealLogDialog = ({
         description: `${mealName} has been logged.`,
       });
 
+      // Invalidate both the specific date query and the general meals query
       queryClient.invalidateQueries({ queryKey: ['meals', childId] });
+      queryClient.invalidateQueries({ queryKey: ['meals', childId, selectedDate] });
 
       setMealName("");
       setSelectedFile(null);

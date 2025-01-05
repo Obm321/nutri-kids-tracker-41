@@ -17,6 +17,7 @@ export const Calendar = ({ selectedDate, onDateSelect }: CalendarProps) => {
     const daysToAdd = direction === 'left' ? -7 : 7;
     newDate.setDate(currentDate.getDate() + daysToAdd);
     setCurrentDate(newDate);
+    onDateSelect?.(newDate); // Ensure we update the parent component when swiping
   };
 
   const getWeekDates = (date: Date) => {
@@ -51,8 +52,9 @@ export const Calendar = ({ selectedDate, onDateSelect }: CalendarProps) => {
   };
 
   const handleDateSelect = (date: Date) => {
-    setCurrentDate(date);
-    onDateSelect?.(date);
+    const newDate = new Date(date);
+    setCurrentDate(newDate);
+    onDateSelect?.(newDate); // Ensure we pass the exact same date instance
   };
 
   return (
