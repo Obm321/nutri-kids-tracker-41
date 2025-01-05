@@ -7,6 +7,7 @@ import { AddChildDialog } from "@/components/dashboard/AddChildDialog";
 import { AddChildColumn } from "@/components/dashboard/AddChildColumn";
 import { ChildDashboard } from "@/components/dashboard/ChildDashboard";
 import { useToast } from "@/hooks/use-toast";
+import { useProfile } from "@/hooks/useProfile";
 import { supabase } from "@/lib/supabase";
 import type { Child } from "@/lib/supabase";
 
@@ -18,6 +19,7 @@ const Index = () => {
   const [selectedChild, setSelectedChild] = useState<Child | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const { data: profile } = useProfile();
 
   useEffect(() => {
     checkUser();
@@ -49,13 +51,13 @@ const Index = () => {
 
   const fetchChildren = async () => {
     try {
-      const { data: profile } = await supabase.auth.getUser();
-      if (!profile.user) return;
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
 
       const { data, error } = await supabase
         .from('children')
         .select('*')
-        .eq('profile_id', profile.user.id);
+        .eq('profile_id', user.id);
 
       if (error) throw error;
       setChildren(data || []);
@@ -70,15 +72,15 @@ const Index = () => {
 
   const handleAddChild = async (childData: Omit<Child, "id" | "profile_id" | "created_at" | "achievements">) => {
     try {
-      const { data: profile } = await supabase.auth.getUser();
-      if (!profile.user) return;
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
 
       const { data, error } = await supabase
         .from('children')
         .insert([
           {
             ...childData,
-            profile_id: profile.user.id,
+            profile_id: user.id,
             achievements: 0,
           }
         ])
