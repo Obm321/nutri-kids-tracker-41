@@ -10,7 +10,7 @@ interface AuthFormProps {
 }
 
 export const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
-  const [isLogin, setIsLogin] = useState(true);
+  const [isLogin, setIsLogin] = useState(false); // Default to signup
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -49,12 +49,7 @@ export const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
           password,
         });
 
-        if (error) {
-          if (error.message === "Invalid login credentials") {
-            throw new Error("Invalid email or password. Please try again.");
-          }
-          throw error;
-        }
+        if (error) throw error;
 
         if (data?.user) {
           toast({
@@ -67,32 +62,51 @@ export const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
+          options: {
+            emailRedirectTo: window.location.origin,
+          },
         });
 
         if (error) throw error;
 
-        if (data?.user?.identities?.length === 0) {
-          toast({
-            title: "Email already registered",
-            description: "Please try logging in instead",
-            variant: "destructive",
-          });
-          setIsLogin(true);
-          return;
-        }
+        if (data?.user) {
+          // Create profile immediately after signup
+          const { error: profileError } = await supabase
+            .from("profiles")
+            .insert({
+              id: data.user.id,
+              email: data.user.email,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+            });
 
-        toast({
-          title: "Account created successfully!",
-          description: "Please check your email for verification.",
-        });
-        onAuthSuccess();
+          if (profileError) {
+            console.error("Error creating profile:", profileError);
+            // Continue anyway as the user is created
+          }
+
+          toast({
+            title: "Account created successfully!",
+            description: "Please check your email for verification.",
+          });
+          onAuthSuccess();
+        }
       }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
+    } catch (error: any) {
+      if (error.message === "User already registered") {
+        toast({
+          title: "Account exists",
+          description: "Please try logging in instead",
+          variant: "destructive",
+        });
+        setIsLogin(true);
+      } else {
+        toast({
+          title: "Error",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -102,7 +116,7 @@ export const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
     <Card className="w-full max-w-md p-6 space-y-6 animate-fadeIn">
       <div className="space-y-2 text-center">
         <h1 className="text-3xl font-bold tracking-tight">
-          {isLogin ? "Welcome Back" : "Create Account"}
+          {isLogin ? "Welcome Back" : "Create Parent Account"}
         </h1>
         <p className="text-muted-foreground">
           {isLogin

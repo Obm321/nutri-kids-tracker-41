@@ -7,42 +7,36 @@ export const useProfile = () => {
     queryKey: ["profile"],
     queryFn: async (): Promise<Profile> => {
       const { data: { user } } = await supabase.auth.getUser();
-      console.log("Current user:", user);
-
+      
       if (!user) throw new Error("Not authenticated");
 
       // First try to get existing profile
-      const { data: existingProfile, error: fetchError } = await supabase
+      let { data: profile, error } = await supabase
         .from("profiles")
         .select("*")
         .eq("id", user.id)
         .single();
 
-      console.log("Existing profile:", existingProfile);
-      console.log("Fetch error:", fetchError);
-
-      // If profile exists, return it
-      if (existingProfile) return existingProfile;
-
-      // If no profile exists, create one
-      const { data: newProfile, error: insertError } = await supabase
-        .from("profiles")
-        .insert([
-          {
+      if (error && error.code === "PGRST116") {
+        // Profile doesn't exist, create it
+        const { data: newProfile, error: createError } = await supabase
+          .from("profiles")
+          .insert({
             id: user.id,
             email: user.email,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
-          },
-        ])
-        .select()
-        .single();
+          })
+          .select()
+          .single();
 
-      console.log("New profile:", newProfile);
-      console.log("Insert error:", insertError);
+        if (createError) throw createError;
+        return newProfile;
+      }
 
-      if (insertError) throw insertError;
-      return newProfile;
+      if (error) throw error;
+      return profile;
     },
+    retry: 1,
   });
 };
