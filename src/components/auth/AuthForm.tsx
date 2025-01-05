@@ -69,7 +69,18 @@ export const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
           password,
         });
 
-        if (error) throw error;
+        if (error) {
+          // Check specifically for email not confirmed error
+          if (error.message.includes("Email not confirmed")) {
+            toast({
+              title: "Email not confirmed",
+              description: "Please check your email and confirm your account before logging in.",
+              variant: "destructive",
+            });
+            return;
+          }
+          throw error;
+        }
 
         if (data?.user) {
           toast({
@@ -93,15 +104,15 @@ export const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
         if (data?.user) {
           await createProfile(data.user.id, data.user.email || '');
           
+          toast({
+            title: "Account created successfully!",
+            description: "Please check your email to confirm your account before logging in.",
+          });
+          
           // After successful registration, switch to login view
           setIsLogin(true);
           setEmail("");
           setPassword("");
-          
-          toast({
-            title: "Account created successfully!",
-            description: "Please log in with your credentials.",
-          });
         }
       }
     } catch (error: any) {
