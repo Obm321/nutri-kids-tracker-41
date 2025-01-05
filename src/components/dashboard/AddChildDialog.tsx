@@ -22,7 +22,7 @@ interface AddChildDialogProps {
   onOpenChange: (open: boolean) => void;
   onAddChild?: (childData: {
     name: string;
-    age: string;
+    age: number;
     gender: string;
     height: string;
     weight: string;
@@ -51,7 +51,7 @@ export const AddChildDialog = ({ open, onOpenChange, onAddChild }: AddChildDialo
 
     onAddChild?.({
       name,
-      age,
+      age: parseInt(age, 10),
       gender,
       height,
       weight,
