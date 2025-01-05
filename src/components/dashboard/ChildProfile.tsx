@@ -71,41 +71,37 @@ export const ChildProfile = ({
     }
   };
 
-  const handleDelete = (e: React.MouseEvent) => {
+  const handleDelete = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    setShowDeleteDialog(true);
-  };
-
-  const handleMealLog = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setShowMealLog(true);
-  };
-
-  const handleUpdateChild = async (updatedData: any) => {
     if (id) {
       try {
         const { error } = await supabase
           .from('children')
-          .update(updatedData)
+          .delete()
           .eq('id', id);
 
         if (error) throw error;
 
         toast({
           title: "Success",
-          description: "Child profile updated successfully.",
+          description: "Child profile removed successfully.",
         });
-        setShowEditDialog(false);
-        window.location.reload();
+
+        if (onDelete) onDelete();
       } catch (error) {
-        console.error('Error updating child:', error);
+        console.error('Error deleting child:', error);
         toast({
           title: "Error",
-          description: "Could not update child profile. Please try again.",
+          description: "Could not delete child profile. Please try again.",
           variant: "destructive",
         });
       }
     }
+  };
+
+  const handleMealLog = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShowMealLog(true);
   };
 
   return (
@@ -121,7 +117,7 @@ export const ChildProfile = ({
           onDelete={handleDelete}
           onMealLog={handleMealLog}
         />
-        <ChildProfileAchievements achievements={achievements} />
+        {id && <ChildProfileAchievements childId={id} />}
       </Card>
 
       <AddChildDialog

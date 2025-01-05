@@ -40,7 +40,6 @@ export const MealLogDialog = ({
   useEffect(() => {
     if (selectedDate) {
       const localDate = new Date(selectedDate);
-      // Set the time to the current time
       const now = new Date();
       localDate.setHours(now.getHours());
       localDate.setMinutes(now.getMinutes());
@@ -74,7 +73,6 @@ export const MealLogDialog = ({
         description: `${mealName} has been logged.`,
       });
 
-      // Invalidate both the specific date query and the general meals query
       queryClient.invalidateQueries({ queryKey: ['meals', childId] });
       queryClient.invalidateQueries({ queryKey: ['meals', childId, selectedDate] });
 
