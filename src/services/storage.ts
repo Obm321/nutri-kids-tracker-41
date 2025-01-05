@@ -10,14 +10,14 @@ export const StorageService = {
       if (!bucketExists) {
         // Create new bucket if it doesn't exist
         const { error: createError } = await supabase.storage.createBucket(bucketName, {
-          public: true // Make bucket public
+          public: false // Keep bucket private for security
         });
         if (createError) throw createError;
       }
 
       // Update bucket configuration
       const { error: updateError } = await supabase.storage.updateBucket(bucketName, {
-        public: true,
+        public: false,
         fileSizeLimit: 1024 * 1024 * 2, // 2MB limit
         allowedMimeTypes: ['image/jpeg', 'image/png', 'image/gif']
       });
@@ -58,29 +58,30 @@ export const StorageService = {
   }
 };
 
-// Execute these SQL commands in your Supabase SQL editor to set up storage permissions:
-/*
+/* Execute these SQL commands in your Supabase SQL editor:
+
 -- Enable RLS
 ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY;
 
 -- Create policy to allow authenticated uploads
-CREATE POLICY "Allow authenticated uploads" 
+CREATE POLICY "authenticated_uploads" 
 ON storage.objects 
 FOR INSERT 
 TO authenticated 
 USING ( bucket_id = 'meals' );
 
 -- Create policy to allow authenticated downloads
-CREATE POLICY "Allow authenticated downloads" 
+CREATE POLICY "authenticated_downloads" 
 ON storage.objects 
 FOR SELECT 
 TO authenticated 
 USING ( bucket_id = 'meals' );
 
--- Create policy to allow public downloads if needed
-CREATE POLICY "Allow public downloads" 
+-- Create policy to allow authenticated deletes
+CREATE POLICY "authenticated_deletes" 
 ON storage.objects 
-FOR SELECT 
-TO anon 
-USING ( bucket_id = 'meals' AND auth.role() = 'anon' );
+FOR DELETE 
+TO authenticated 
+USING ( bucket_id = 'meals' );
+
 */
