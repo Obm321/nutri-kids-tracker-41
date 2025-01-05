@@ -18,12 +18,12 @@ export const MealLogDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Log Meal {mealType ? `for ${mealType}` : ''}</DialogTitle>
+          <DialogTitle>Log Meal for {mealType}</DialogTitle>
         </DialogHeader>
         <MealPhotoInput 
           mealType={mealType} 
-          selectedDate={selectedDate}
           onSuccess={() => onOpenChange(false)}
+          selectedDate={selectedDate}
         />
       </DialogContent>
     </Dialog>

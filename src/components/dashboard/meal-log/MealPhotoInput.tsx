@@ -4,50 +4,16 @@ import { Label } from "@/components/ui/label";
 import { Camera, Upload } from "lucide-react";
 import { useState, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/lib/supabase";
-import { useParams } from "react-router-dom";
-import { MealService } from "@/services/meals";
 
 interface MealPhotoInputProps {
-  mealType: string | null;
-  selectedDate: Date;
-  onSuccess: () => void;
+  onPhotoSelect: (file: File) => void;
 }
 
-export const MealPhotoInput = ({ mealType, selectedDate, onSuccess }: MealPhotoInputProps) => {
+export const MealPhotoInput = ({ onPhotoSelect }: MealPhotoInputProps) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [showCamera, setShowCamera] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const { toast } = useToast();
-  const { id: childId } = useParams();
-
-  const handleMealSubmit = async (file: File) => {
-    if (!childId || !mealType) return;
-
-    try {
-      await MealService.createMeal({
-        childId,
-        name: "Meal Photo",
-        type: mealType,
-        photoFile: file,
-        dateTime: selectedDate,
-      });
-
-      toast({
-        title: "Success",
-        description: "Meal logged successfully",
-      });
-      
-      onSuccess();
-    } catch (error) {
-      console.error('Error submitting meal:', error);
-      toast({
-        title: "Error",
-        description: "Failed to log meal. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
 
   const startCamera = async () => {
     try {
@@ -86,7 +52,7 @@ export const MealPhotoInput = ({ mealType, selectedDate, onSuccess }: MealPhotoI
         if (blob) {
           const file = new File([blob], "captured-meal.jpg", { type: "image/jpeg" });
           setSelectedFile(file);
-          handleMealSubmit(file);
+          onPhotoSelect(file);
           stopCamera();
         }
       }, 'image/jpeg');
@@ -97,7 +63,7 @@ export const MealPhotoInput = ({ mealType, selectedDate, onSuccess }: MealPhotoI
     const file = event.target.files?.[0];
     if (file) {
       setSelectedFile(file);
-      handleMealSubmit(file);
+      onPhotoSelect(file);
     }
   };
 
