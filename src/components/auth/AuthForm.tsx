@@ -16,38 +16,77 @@ export const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
+  const validateForm = () => {
+    if (!email || !email.includes('@')) {
+      toast({
+        title: "Invalid email",
+        description: "Please enter a valid email address",
+        variant: "destructive",
+      });
+      return false;
+    }
+    if (!password || password.length < 6) {
+      toast({
+        title: "Invalid password",
+        description: "Password must be at least 6 characters long",
+        variant: "destructive",
+      });
+      return false;
+    }
+    return true;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validateForm()) return;
+    
     setLoading(true);
 
     try {
       if (isLogin) {
-        const { error } = await supabase.auth.signInWithPassword({
+        const { data, error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
 
-        if (error) throw error;
+        if (error) {
+          if (error.message === "Invalid login credentials") {
+            throw new Error("Invalid email or password. Please try again.");
+          }
+          throw error;
+        }
 
-        toast({
-          title: "Welcome back!",
-          description: "You are now logged in.",
-        });
+        if (data?.user) {
+          toast({
+            title: "Welcome back!",
+            description: "You have successfully logged in.",
+          });
+          onAuthSuccess();
+        }
       } else {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
         });
 
         if (error) throw error;
+
+        if (data?.user?.identities?.length === 0) {
+          toast({
+            title: "Email already registered",
+            description: "Please try logging in instead",
+            variant: "destructive",
+          });
+          setIsLogin(true);
+          return;
+        }
 
         toast({
           title: "Account created successfully!",
           description: "Please check your email for verification.",
         });
+        onAuthSuccess();
       }
-
-      onAuthSuccess();
     } catch (error) {
       toast({
         title: "Error",
@@ -88,6 +127,7 @@ export const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
             onChange={(e) => setPassword(e.target.value)}
             required
             className="w-full"
+            minLength={6}
           />
         </div>
         <Button type="submit" className="w-full" disabled={loading}>
