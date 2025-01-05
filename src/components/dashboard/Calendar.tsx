@@ -50,7 +50,6 @@ export const Calendar = ({ selectedDate, onDateSelect }: CalendarProps) => {
     return `${date.getMonth() + 1}月`;
   };
 
-  // Handle date selection with proper state updates
   const handleDateSelect = (date: Date) => {
     setCurrentDate(date);
     onDateSelect?.(date);
@@ -58,7 +57,7 @@ export const Calendar = ({ selectedDate, onDateSelect }: CalendarProps) => {
 
   return (
     <div 
-      className="bg-secondary w-full p-4 text-white select-none"
+      className="bg-secondary w-full py-2 text-white select-none"
       onMouseDown={(e) => {
         isDraggingRef.current = true;
         startXRef.current = e.clientX;
@@ -92,9 +91,9 @@ export const Calendar = ({ selectedDate, onDateSelect }: CalendarProps) => {
         }
       }}
     >
-      <div className="grid grid-cols-7 gap-4 text-center">
+      <div className="grid grid-cols-7 text-center text-sm max-w-3xl mx-auto px-4">
         {days.map((day) => (
-          <div key={day} className="text-sm font-medium">
+          <div key={day} className="text-white/80 text-xs font-medium">
             {day}
           </div>
         ))}
@@ -102,18 +101,18 @@ export const Calendar = ({ selectedDate, onDateSelect }: CalendarProps) => {
           <div 
             key={index} 
             onClick={() => handleDateSelect(date)}
-            className={`relative text-lg cursor-pointer transition-colors
-              ${isSameDay(date, selectedDate || today) ? 
-                'bg-white text-secondary rounded-full w-12 h-12 flex items-center justify-center mx-auto' : 
-                'hover:bg-white/10'}`}
+            className="relative py-1 cursor-pointer transition-colors"
           >
             {isSameDay(date, selectedDate || today) ? (
-              <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-white text-secondary rounded-full w-16 h-16 flex flex-col items-center justify-center">
-                <span className="text-xs">{getMonthInJapanese(date)}</span>
-                <span className="text-xl">{date.getDate()}</span>
+              <div className="relative">
+                <div className="absolute -top-1 left-1/2 -translate-x-1/2 bg-white text-secondary rounded-full w-14 h-14 flex flex-col items-center justify-center">
+                  <span className="text-xs font-medium">{getMonthInJapanese(date)}</span>
+                  <span className="text-lg font-bold">{date.getDate()}</span>
+                </div>
+                <span className="invisible">{date.getDate()}</span>
               </div>
             ) : (
-              date.getDate()
+              <span className="text-base hover:opacity-80">{date.getDate()}</span>
             )}
           </div>
         ))}
