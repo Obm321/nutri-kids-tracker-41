@@ -42,9 +42,9 @@ export const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
         .from("profiles")
         .select("*")
         .eq("id", userId)
-        .maybeSingle();
+        .single();
 
-      if (fetchError) {
+      if (fetchError && fetchError.code !== 'PGRST116') {
         console.error("Error checking existing profile:", fetchError);
         throw fetchError;
       }
@@ -56,12 +56,14 @@ export const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
 
       const { data: newProfile, error: createError } = await supabase
         .from("profiles")
-        .insert([{
-          id: userId,
-          email: userEmail,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        }])
+        .upsert([
+          {
+            id: userId,
+            email: userEmail,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          }
+        ])
         .select()
         .single();
 
@@ -86,7 +88,6 @@ export const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
 
     try {
       if (isLogin) {
-        // Login flow
         const { data, error } = await supabase.auth.signInWithPassword({
           email,
           password,
@@ -103,22 +104,14 @@ export const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
           onAuthSuccess();
         }
       } else {
-        // Sign up flow - modified to auto-sign in after signup
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
-          options: {
-            emailRedirectTo: window.location.origin,
-            data: {
-              email: email,
-            }
-          }
         });
 
         if (error) throw error;
 
         if (data?.user) {
-          // Create profile immediately after signup
           await createProfile(data.user.id, data.user.email || '');
           toast({
             title: "Account created successfully!",
