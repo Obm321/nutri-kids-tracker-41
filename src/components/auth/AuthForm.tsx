@@ -53,7 +53,6 @@ export const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
       }
     } catch (error) {
       console.error("Profile creation failed:", error);
-      // We'll continue even if profile creation fails, as the user is created
     }
   };
 
@@ -80,6 +79,7 @@ export const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
           onAuthSuccess();
         }
       } else {
+        // Sign up flow
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
@@ -93,11 +93,15 @@ export const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
         if (data?.user) {
           await createProfile(data.user.id, data.user.email || '');
           
+          // After successful registration, switch to login view
+          setIsLogin(true);
+          setEmail("");
+          setPassword("");
+          
           toast({
             title: "Account created successfully!",
-            description: "Please check your email for verification.",
+            description: "Please log in with your credentials.",
           });
-          onAuthSuccess();
         }
       }
     } catch (error: any) {
