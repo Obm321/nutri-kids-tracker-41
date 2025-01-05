@@ -37,10 +37,14 @@ export const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
   };
 
   const createProfile = async (userId: string, userEmail: string) => {
+    // Add a small delay to ensure session is properly initialized
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
     const { data: { session } } = await supabase.auth.getSession();
+    console.log("Current session before profile creation:", session);
     
     if (!session) {
-      console.error("No session available");
+      console.error("No session available for profile creation");
       return;
     }
 
@@ -52,14 +56,19 @@ export const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
           email: userEmail,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
+        }, {
+          onConflict: 'id'
         });
 
       if (profileError) {
         console.error("Error creating profile:", profileError);
         throw profileError;
       }
+      
+      console.log("Profile created successfully for user:", userId);
     } catch (error) {
       console.error("Profile creation failed:", error);
+      throw error;
     }
   };
 
