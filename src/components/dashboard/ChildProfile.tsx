@@ -62,7 +62,8 @@ export const ChildProfile = ({
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [childData, setChildData] = useState<any>(null);
 
-  const handleCardClick = () => {
+  const handleCardClick = (e: React.MouseEvent) => {
+    e.preventDefault();
     if (id) {
       navigate(`/child/${id}`);
     }

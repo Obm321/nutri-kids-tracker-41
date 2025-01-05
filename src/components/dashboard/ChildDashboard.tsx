@@ -1,24 +1,14 @@
 import { Calendar } from "./Calendar";
-import { Plus, ArrowLeft, Info } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
 import { MealLogDialog } from "./MealLogDialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { useState } from "react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { useParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/lib/supabase";
 
 interface ChildDashboardProps {
-  child: {
+  child?: {
     name: string;
     age: number;
     gender: string;
@@ -28,10 +18,24 @@ interface ChildDashboardProps {
 }
 
 export const ChildDashboard = ({ child }: ChildDashboardProps) => {
-  const navigate = useNavigate();
+  const { id } = useParams();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showMealLog, setShowMealLog] = useState(false);
   const [selectedMealType, setSelectedMealType] = useState<string | null>(null);
+
+  const { data: childData } = useQuery({
+    queryKey: ["child", id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("children")
+        .select("*")
+        .eq("id", id)
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+  });
 
   const handleMealLog = (type?: string) => {
     setSelectedMealType(type || null);
@@ -39,6 +43,10 @@ export const ChildDashboard = ({ child }: ChildDashboardProps) => {
   };
 
   const mealTypes = ["Breakfast", "Lunch", "Dinner", "Snack"];
+
+  if (!childData) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="min-h-screen bg-muted">
