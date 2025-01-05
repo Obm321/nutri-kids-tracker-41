@@ -4,7 +4,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,7 +11,13 @@ import { Camera, Upload } from "lucide-react";
 import { useState, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 
-export const MealLogDialog = () => {
+interface MealLogDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  mealType: string | null;
+}
+
+export const MealLogDialog = ({ open, onOpenChange, mealType }: MealLogDialogProps) => {
   const [mealName, setMealName] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [showCamera, setShowCamera] = useState(false);
@@ -89,19 +94,14 @@ export const MealLogDialog = () => {
     setMealName("");
     setSelectedFile(null);
     stopCamera();
+    onOpenChange(false);
   };
 
   return (
-    <Dialog onOpenChange={(open) => !open && stopCamera()}>
-      <DialogTrigger asChild>
-        <Button variant="outline" className="flex-1 sm:flex-initial items-center gap-2">
-          <Camera className="w-4 h-4" />
-          <span className="hidden sm:inline">Log Meal</span>
-        </Button>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Log a Meal</DialogTitle>
+          <DialogTitle>Log {mealType} Meal</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
