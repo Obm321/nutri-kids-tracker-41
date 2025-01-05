@@ -22,11 +22,16 @@ export const Calendar = ({ selectedDate, onDateSelect }: CalendarProps) => {
   const getWeekDates = (date: Date) => {
     const dates = [];
     const curr = new Date(date);
-    const first = curr.getDate() - curr.getDay() + 1;
     
+    // Get Monday of the current week
+    const mondayOffset = curr.getDay() === 0 ? -6 : 1 - curr.getDay();
+    curr.setDate(curr.getDate() + mondayOffset);
+    
+    // Generate 7 days starting from Monday
     for (let i = 0; i < 7; i++) {
-      const day = new Date(curr.setDate(first + i));
+      const day = new Date(curr);
       dates.push(day);
+      curr.setDate(curr.getDate() + 1);
     }
     
     return dates;
@@ -43,6 +48,12 @@ export const Calendar = ({ selectedDate, onDateSelect }: CalendarProps) => {
 
   const getMonthInJapanese = (date: Date) => {
     return `${date.getMonth() + 1}月`;
+  };
+
+  // Handle date selection with proper state updates
+  const handleDateSelect = (date: Date) => {
+    setCurrentDate(date);
+    onDateSelect?.(date);
   };
 
   return (
@@ -90,7 +101,7 @@ export const Calendar = ({ selectedDate, onDateSelect }: CalendarProps) => {
         {weekDates.map((date, index) => (
           <div 
             key={index} 
-            onClick={() => onDateSelect?.(date)}
+            onClick={() => handleDateSelect(date)}
             className={`relative text-lg cursor-pointer transition-colors
               ${isSameDay(date, selectedDate || today) ? 
                 'bg-white text-secondary rounded-full w-12 h-12 flex items-center justify-center mx-auto' : 
