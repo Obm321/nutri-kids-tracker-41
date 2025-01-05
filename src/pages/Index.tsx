@@ -19,7 +19,11 @@ const Index = () => {
   const [selectedChild, setSelectedChild] = useState<Child | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
-  const { data: profile } = useProfile();
+  const { data: profile, error: profileError } = useProfile();
+
+  // Debug logs for profile
+  console.log("Profile in component:", profile);
+  console.log("Profile error in component:", profileError);
 
   useEffect(() => {
     checkUser();
@@ -185,6 +189,11 @@ const Index = () => {
       <Calendar />
       <DashboardHeader />
       <main className="container px-4 py-4 sm:py-6 space-y-4">
+        {profileError && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+            Error loading profile: {profileError.message}
+          </div>
+        )}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {children.map((child) => (
             <ChildProfile

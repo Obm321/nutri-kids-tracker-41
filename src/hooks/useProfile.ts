@@ -7,6 +7,8 @@ export const useProfile = () => {
     queryKey: ["profile"],
     queryFn: async (): Promise<Profile> => {
       const { data: { user } } = await supabase.auth.getUser();
+      console.log("Current user:", user); // Debug log
+
       if (!user) throw new Error("Not authenticated");
 
       const { data, error } = await supabase
@@ -14,6 +16,9 @@ export const useProfile = () => {
         .select("*")
         .eq("id", user.id)
         .single();
+
+      console.log("Profile data:", data); // Debug log
+      console.log("Profile error:", error); // Debug log
 
       if (error) throw error;
       return data;
