@@ -9,16 +9,13 @@ export const StorageService = {
       
       if (!bucketExists) {
         // Create new bucket if it doesn't exist
-        const { error: createError } = await supabase.storage.createBucket(bucketName, {
-          public: false // Set to false initially
-        });
-          
+        const { error: createError } = await supabase.storage.createBucket(bucketName);
         if (createError) throw createError;
       }
 
-      // Set bucket to be public and configure CORS
+      // Update bucket configuration
       const { error: updateError } = await supabase.storage.updateBucket(bucketName, {
-        public: false,
+        public: true,
         fileSizeLimit: 1024 * 1024 * 2, // 2MB limit
         allowedMimeTypes: ['image/jpeg', 'image/png', 'image/gif']
       });
@@ -58,3 +55,23 @@ export const StorageService = {
     }
   }
 };
+
+// Execute these SQL commands in your Supabase SQL editor to set up storage permissions:
+/*
+-- Enable RLS
+ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY;
+
+-- Create policy to allow authenticated users to upload files
+CREATE POLICY "Allow authenticated uploads" 
+ON storage.objects 
+FOR INSERT 
+TO authenticated 
+WITH CHECK (bucket_id = 'your-bucket-name');
+
+-- Create policy to allow authenticated users to read files
+CREATE POLICY "Allow authenticated downloads" 
+ON storage.objects 
+FOR SELECT 
+TO authenticated 
+USING (bucket_id = 'your-bucket-name');
+*/
