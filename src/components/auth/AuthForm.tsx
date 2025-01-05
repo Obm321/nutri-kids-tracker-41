@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/lib/supabase";
 
 interface AuthFormProps {
   onAuthSuccess: () => void;
@@ -12,16 +13,50 @@ export const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement actual authentication
-    toast({
-      title: isLogin ? "Welcome back!" : "Account created successfully!",
-      description: "You are now logged in.",
-    });
-    onAuthSuccess();
+    setLoading(true);
+
+    try {
+      if (isLogin) {
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+
+        if (error) throw error;
+
+        toast({
+          title: "Welcome back!",
+          description: "You are now logged in.",
+        });
+      } else {
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+        });
+
+        if (error) throw error;
+
+        toast({
+          title: "Account created successfully!",
+          description: "Please check your email for verification.",
+        });
+      }
+
+      onAuthSuccess();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -55,8 +90,8 @@ export const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
             className="w-full"
           />
         </div>
-        <Button type="submit" className="w-full">
-          {isLogin ? "Sign In" : "Create Account"}
+        <Button type="submit" className="w-full" disabled={loading}>
+          {loading ? "Loading..." : isLogin ? "Sign In" : "Create Account"}
         </Button>
       </form>
       <div className="text-center">
