@@ -19,8 +19,8 @@ export const StorageService = {
         if (createError) throw createError;
       }
 
-      // Update bucket policies to allow authenticated uploads
-      const { error: policyError } = await supabase.storage.from(bucketName).update({
+      // Update bucket to be public
+      const { error: policyError } = await supabase.storage.updateBucket(bucketName, {
         public: true
       });
       
