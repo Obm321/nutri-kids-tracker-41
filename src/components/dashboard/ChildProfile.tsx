@@ -154,43 +154,44 @@ export const ChildProfile = ({
   return (
     <>
       <Card 
-        className="p-4 sm:p-6 animate-fadeIn cursor-pointer relative"
+        className="p-4 bg-white rounded-xl shadow-sm cursor-pointer hover:shadow-md transition-shadow"
         onClick={handleCardClick}
       >
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button 
-              className="absolute top-2 right-2 p-2 hover:bg-muted rounded-full"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <Settings className="w-5 h-5 text-muted-foreground" />
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="bg-white">
-            <DropdownMenuItem onClick={handleEdit}>
-              <Edit className="mr-2 h-4 w-4" />
-              Edit Profile
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={handleDelete} className="text-destructive">
-              <Trash2 className="mr-2 h-4 w-4" />
-              Remove Profile
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-        
-        <div className="flex items-center gap-3 sm:gap-4 mb-4">
-          <div className="h-12 w-12 sm:h-16 sm:w-16 rounded-full bg-primary flex items-center justify-center">
-            <span className="text-xl sm:text-2xl font-bold text-white">
-              {name.charAt(0)}
-            </span>
+        <div className="flex justify-between items-start mb-4">
+          <div className="flex items-center gap-3">
+            <div className="h-12 w-12 rounded-full bg-[#4ADE80] flex items-center justify-center">
+              <span className="text-xl font-bold text-white">
+                {name.charAt(0)}
+              </span>
+            </div>
+            <div>
+              <h2 className="text-xl font-bold">{name}</h2>
+              <p className="text-sm text-muted-foreground">{age} years old</p>
+            </div>
           </div>
-          <div>
-            <h2 className="text-lg sm:text-xl font-bold">{name}</h2>
-            <p className="text-sm sm:text-base text-muted-foreground">{age} years old</p>
-          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button 
+                className="p-2 hover:bg-muted rounded-full"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <Settings className="w-5 h-5 text-muted-foreground" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={handleEdit}>
+                <Edit className="mr-2 h-4 w-4" />
+                Edit Profile
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleDelete} className="text-destructive">
+                <Trash2 className="mr-2 h-4 w-4" />
+                Remove Profile
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-3 gap-2 mb-4">
           <div className="bg-[#FCD34D] rounded-lg p-2 text-center">
             <span className="text-lg font-bold">A</span>
           </div>
@@ -202,7 +203,7 @@ export const ChildProfile = ({
           </div>
         </div>
 
-        <div className="mt-4 text-center text-sm text-muted-foreground">
+        <div className="text-center text-sm text-muted-foreground">
           {achievements} achievements
         </div>
       </Card>
