@@ -4,26 +4,28 @@ export const StorageService = {
   async ensureBucket(bucketName: string) {
     try {
       // First check if bucket exists
-      const { data: buckets } = await supabase.storage.listBuckets();
+      const { data: buckets, error: listError } = await supabase.storage.listBuckets();
+      
+      if (listError) {
+        console.error('Error listing buckets:', listError);
+        throw listError;
+      }
+
       const bucketExists = buckets?.some(bucket => bucket.name === bucketName);
       
       if (!bucketExists) {
         // Create new bucket if it doesn't exist
         const { error: createError } = await supabase.storage.createBucket(bucketName, {
-          public: true // Make bucket public for now to debug
+          public: true,
+          allowedMimeTypes: ['image/jpeg', 'image/png', 'image/gif'],
+          fileSizeLimit: 1024 * 1024 * 2 // 2MB limit
         });
-        if (createError) throw createError;
+        
+        if (createError) {
+          console.error('Error creating bucket:', createError);
+          throw createError;
+        }
       }
-
-      // Update bucket configuration
-      const { error: updateError } = await supabase.storage.updateBucket(bucketName, {
-        public: true, // Make bucket public for now to debug
-        fileSizeLimit: 1024 * 1024 * 2, // 2MB limit
-        allowedMimeTypes: ['image/jpeg', 'image/png', 'image/gif']
-      });
-      
-      if (updateError) throw updateError;
-      
     } catch (error) {
       console.error('Storage bucket error:', error);
       throw new Error('Failed to initialize storage bucket');
@@ -44,7 +46,10 @@ export const StorageService = {
           cacheControl: '3600'
         });
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error('Upload error:', uploadError);
+        throw uploadError;
+      }
 
       const { data: { publicUrl } } = supabase.storage
         .from(bucketName)
@@ -57,31 +62,3 @@ export const StorageService = {
     }
   }
 };
-
-/* Execute these SQL commands in your Supabase SQL editor:
-
--- Enable RLS
-ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY;
-
--- Create policy to allow all uploads
-CREATE POLICY "allow_public_uploads" 
-ON storage.objects 
-FOR INSERT 
-TO public
-USING ( bucket_id = 'meal-photos' );
-
--- Create policy to allow all downloads
-CREATE POLICY "allow_public_downloads" 
-ON storage.objects 
-FOR SELECT 
-TO public
-USING ( bucket_id = 'meal-photos' );
-
--- Create policy to allow all deletes
-CREATE POLICY "allow_public_deletes" 
-ON storage.objects 
-FOR DELETE 
-TO public
-USING ( bucket_id = 'meal-photos' );
-
-*/
