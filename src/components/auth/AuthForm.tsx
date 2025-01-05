@@ -36,6 +36,27 @@ export const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
     return true;
   };
 
+  const createProfile = async (userId: string, userEmail: string) => {
+    try {
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .upsert({
+          id: userId,
+          email: userEmail,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        });
+
+      if (profileError) {
+        console.error("Error creating profile:", profileError);
+        throw profileError;
+      }
+    } catch (error) {
+      console.error("Profile creation failed:", error);
+      // We'll continue even if profile creation fails, as the user is created
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) return;
@@ -70,20 +91,8 @@ export const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
         if (error) throw error;
 
         if (data?.user) {
-          // Create profile immediately after signup
-          const { error: profileError } = await supabase
-            .from("profiles")
-            .insert({
-              id: data.user.id,
-              email: data.user.email,
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString(),
-            });
-
-          if (profileError) {
-            console.error("Error creating profile:", profileError);
-          }
-
+          await createProfile(data.user.id, data.user.email || '');
+          
           toast({
             title: "Account created successfully!",
             description: "Please check your email for verification.",

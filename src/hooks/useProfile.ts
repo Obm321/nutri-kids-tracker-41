@@ -12,44 +12,49 @@ export const useProfile = () => {
 
       console.log("Fetching profile for user:", user.id);
 
-      // First try to get existing profile
-      const { data: existingProfile, error: fetchError } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", user.id)
-        .maybeSingle();
+      try {
+        // First try to get existing profile
+        const { data: existingProfile, error: fetchError } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", user.id)
+          .single();
 
-      if (fetchError && fetchError.code !== "PGRST116") {
-        console.error("Error fetching profile:", fetchError);
-        throw fetchError;
-      }
+        if (fetchError) {
+          if (fetchError.code === "PGRST116") {
+            console.log("No profile found, creating new profile");
+            
+            // Create new profile if none exists
+            const { data: newProfile, error: createError } = await supabase
+              .from("profiles")
+              .upsert({
+                id: user.id,
+                email: user.email,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+              })
+              .select()
+              .single();
 
-      if (existingProfile) {
+            if (createError) {
+              console.error("Error creating profile:", createError);
+              throw createError;
+            }
+
+            console.log("Created new profile:", newProfile);
+            return newProfile;
+          }
+          
+          console.error("Error fetching profile:", fetchError);
+          throw fetchError;
+        }
+
         console.log("Found existing profile:", existingProfile);
         return existingProfile;
+      } catch (error) {
+        console.error("Profile operation failed:", error);
+        throw error;
       }
-
-      console.log("No profile found, creating new profile");
-
-      // Create new profile if none exists
-      const { data: newProfile, error: createError } = await supabase
-        .from("profiles")
-        .insert({
-          id: user.id,
-          email: user.email,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        })
-        .select()
-        .single();
-
-      if (createError) {
-        console.error("Error creating profile:", createError);
-        throw createError;
-      }
-
-      console.log("Created new profile:", newProfile);
-      return newProfile;
     },
     retry: 1,
   });
