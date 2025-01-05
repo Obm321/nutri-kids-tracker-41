@@ -104,6 +104,33 @@ export const ChildProfile = ({
     setShowMealLog(true);
   };
 
+  const handleUpdateChild = async (updatedData: any) => {
+    if (id) {
+      try {
+        const { error } = await supabase
+          .from('children')
+          .update(updatedData)
+          .eq('id', id);
+
+        if (error) throw error;
+
+        toast({
+          title: "Success",
+          description: "Child profile updated successfully.",
+        });
+        setShowEditDialog(false);
+        window.location.reload();
+      } catch (error) {
+        console.error('Error updating child:', error);
+        toast({
+          title: "Error",
+          description: "Could not update child profile. Please try again.",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
   return (
     <>
       <Card 
