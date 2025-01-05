@@ -9,11 +9,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Camera, Upload } from "lucide-react";
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/lib/supabase";
 import { useParams } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
+import { MealService } from "@/services/meals";
 
 interface MealLogDialogProps {
   open: boolean;
@@ -80,59 +80,6 @@ export const MealLogDialog = ({ open, onOpenChange, mealType }: MealLogDialogPro
     }
   };
 
-  const ensureStorageBucket = async () => {
-    try {
-      // Check if bucket exists
-      const { data: buckets } = await supabase
-        .storage
-        .listBuckets();
-      
-      const bucketExists = buckets?.some(bucket => bucket.name === 'meal-photos');
-      
-      if (!bucketExists) {
-        // Create bucket if it doesn't exist
-        const { data, error: createError } = await supabase
-          .storage
-          .createBucket('meal-photos', {
-            public: true,
-            fileSizeLimit: 1024 * 1024 * 2 // 2MB
-          });
-          
-        if (createError) {
-          console.error('Error creating bucket:', createError);
-          throw new Error('Failed to create storage bucket');
-        }
-      }
-    } catch (error) {
-      console.error('Error checking/creating bucket:', error);
-      throw new Error('Failed to initialize storage');
-    }
-  };
-
-  const uploadImage = async (file: File) => {
-    try {
-      await ensureStorageBucket();
-      
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Date.now()}.${fileExt}`;
-      
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('meal-photos')
-        .upload(fileName, file);
-
-      if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('meal-photos')
-        .getPublicUrl(fileName);
-
-      return publicUrl;
-    } catch (error) {
-      console.error('Error uploading image:', error);
-      throw new Error('Failed to upload image');
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -146,34 +93,18 @@ export const MealLogDialog = ({ open, onOpenChange, mealType }: MealLogDialogPro
     }
 
     try {
-      // Upload image and get public URL
-      const publicUrl = await uploadImage(selectedFile);
-
-      // Save meal data to the database
-      const { error: insertError } = await supabase
-        .from('meals')
-        .insert([
-          {
-            child_id: childId,
-            name: mealName,
-            type: mealType,
-            photo_url: publicUrl,
-            date: new Date().toISOString(),
-            carbs: 0,
-            protein: 0,
-            fat: 0,
-            calories: 0,
-          }
-        ]);
-
-      if (insertError) throw insertError;
+      await MealService.createMeal({
+        childId,
+        name: mealName,
+        type: mealType,
+        photoFile: selectedFile,
+      });
 
       toast({
         title: "Success",
         description: `${mealName} has been logged.`,
       });
 
-      // Invalidate queries to refresh the data
       queryClient.invalidateQueries({ queryKey: ['meals', childId] });
 
       setMealName("");
