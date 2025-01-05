@@ -6,37 +6,49 @@ export const useProfile = () => {
   return useQuery({
     queryKey: ["profile"],
     queryFn: async (): Promise<Profile> => {
-      // First check if we have an authenticated user
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      // Wait for auth state to be initialized
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       
-      if (authError || !user) {
-        console.error("Authentication error:", authError);
+      if (sessionError) {
+        console.error("Session error:", sessionError);
+        throw new Error("Authentication error");
+      }
+
+      if (!session) {
+        console.error("No active session");
         throw new Error("Not authenticated");
       }
 
-      console.log("Authenticated user:", user.id);
+      console.log("Authenticated user:", session.user.id);
 
       try {
         // Try to fetch existing profile first
         const { data: existingProfile, error: fetchError } = await supabase
           .from("profiles")
           .select()
-          .eq("id", user.id)
+          .eq("id", session.user.id)
           .single();
 
-        if (!fetchError && existingProfile) {
+        if (fetchError) {
+          console.error("Error fetching profile:", fetchError);
+          throw fetchError;
+        }
+
+        if (existingProfile) {
           console.log("Found existing profile:", existingProfile);
           return existingProfile;
         }
 
-        // If no profile exists or there was an error fetching, try to create one
+        // If no profile exists, create one
         const { data: newProfile, error: createError } = await supabase
           .from("profiles")
           .upsert({
-            id: user.id,
-            email: user.email,
+            id: session.user.id,
+            email: session.user.email,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
+          }, {
+            onConflict: 'id'
           })
           .select()
           .single();
@@ -53,6 +65,7 @@ export const useProfile = () => {
         throw error;
       }
     },
-    retry: 1,
+    retry: false, // Don't retry on failure
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
   });
 };
