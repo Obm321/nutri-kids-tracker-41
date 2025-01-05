@@ -5,8 +5,10 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 import { AddChildDialog } from "./AddChildDialog";
 import { ChildProfileHeader } from "./child-profile/ChildProfileHeader";
-import { ChildProfileAchievements } from "./child-profile/ChildProfileAchievements";
+import { NutritionSummary } from "./NutritionSummary";
 import { MealLogDialog } from "./MealLogDialog";
+import { useQuery } from "@tanstack/react-query";
+import { MealService } from "@/services/meals";
 
 interface ChildProfileProps {
   name: string;
@@ -39,6 +41,13 @@ export const ChildProfile = ({
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showMealLog, setShowMealLog] = useState(false);
   const [childData, setChildData] = useState<any>(null);
+  const today = new Date();
+
+  const { data: mealsData } = useQuery({
+    queryKey: ['meals', id, today],
+    queryFn: () => id ? MealService.getMealsByChildAndDate(id, today) : Promise.resolve([]),
+    enabled: !!id,
+  });
 
   const handleCardClick = () => {
     if (id) {
@@ -71,9 +80,33 @@ export const ChildProfile = ({
     }
   };
 
-  const handleDelete = (e: React.MouseEvent) => {
+  const handleDelete = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    setShowDeleteDialog(true);
+    if (id) {
+      try {
+        const { error } = await supabase
+          .from('children')
+          .delete()
+          .eq('id', id);
+
+        if (error) throw error;
+
+        toast({
+          title: "Success",
+          description: "Child profile deleted successfully.",
+        });
+
+        if (onDelete) onDelete();
+        window.location.reload();
+      } catch (error) {
+        console.error('Error deleting child:', error);
+        toast({
+          title: "Error",
+          description: "Could not delete child profile. Please try again.",
+          variant: "destructive",
+        });
+      }
+    }
   };
 
   const handleMealLog = (e: React.MouseEvent) => {
@@ -121,7 +154,19 @@ export const ChildProfile = ({
           onDelete={handleDelete}
           onMealLog={handleMealLog}
         />
-        <ChildProfileAchievements achievements={achievements} />
+        <div className="mt-4">
+          <NutritionSummary nutrition={mealsData ? {
+            calories: mealsData.reduce((sum: number, meal: any) => sum + (meal.calories || 0), 0),
+            carbs: mealsData.reduce((sum: number, meal: any) => sum + (meal.carbs || 0), 0),
+            protein: mealsData.reduce((sum: number, meal: any) => sum + (meal.protein || 0), 0),
+            fat: mealsData.reduce((sum: number, meal: any) => sum + (meal.fat || 0), 0),
+          } : {
+            calories: 0,
+            carbs: 0,
+            protein: 0,
+            fat: 0,
+          }} />
+        </div>
       </Card>
 
       <AddChildDialog
@@ -135,7 +180,7 @@ export const ChildProfile = ({
       <MealLogDialog
         open={showMealLog}
         onOpenChange={setShowMealLog}
-        selectedDate={new Date()}
+        selectedDate={today}
         mealType={null}
       />
     </>
