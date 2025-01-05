@@ -18,6 +18,12 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useState } from "react";
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_ANON_KEY
+);
 
 interface ChildProfileProps {
   name: string;
@@ -26,6 +32,7 @@ interface ChildProfileProps {
   onClick?: () => void;
   onEdit?: () => void;
   onDelete?: () => void;
+  id?: string;
 }
 
 export const ChildProfile = ({ 
@@ -34,14 +41,33 @@ export const ChildProfile = ({
   achievements, 
   onClick,
   onEdit,
-  onDelete 
+  onDelete,
+  id 
 }: ChildProfileProps) => {
   const { toast } = useToast();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
-  const handleEdit = (e: React.MouseEvent) => {
+  const handleEdit = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    onEdit?.();
+    if (id) {
+      try {
+        const { data, error } = await supabase
+          .from('children')
+          .select('*')
+          .eq('id', id)
+          .single();
+          
+        if (error) throw error;
+        onEdit?.();
+      } catch (error) {
+        console.error('Error fetching child data:', error);
+        toast({
+          title: "Error",
+          description: "Could not fetch child data. Please try again.",
+          variant: "destructive",
+        });
+      }
+    }
   };
 
   const handleDelete = (e: React.MouseEvent) => {
@@ -49,13 +75,31 @@ export const ChildProfile = ({
     setShowDeleteDialog(true);
   };
 
-  const confirmDelete = () => {
-    onDelete?.();
-    setShowDeleteDialog(false);
-    toast({
-      title: "Success",
-      description: "Child profile deleted successfully.",
-    });
+  const confirmDelete = async () => {
+    if (id) {
+      try {
+        const { error } = await supabase
+          .from('children')
+          .delete()
+          .eq('id', id);
+          
+        if (error) throw error;
+        
+        onDelete?.();
+        setShowDeleteDialog(false);
+        toast({
+          title: "Success",
+          description: "Child profile deleted successfully.",
+        });
+      } catch (error) {
+        console.error('Error deleting child:', error);
+        toast({
+          title: "Error",
+          description: "Could not delete child profile. Please try again.",
+          variant: "destructive",
+        });
+      }
+    }
   };
 
   return (
