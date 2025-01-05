@@ -82,11 +82,26 @@ export const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
 
         if (data?.user) {
           if (!data.user.email_confirmed_at) {
-            toast({
-              title: "Email not verified",
-              description: "Please check your email and verify your account before logging in.",
-              variant: "destructive",
+            // Resend verification email if user is not verified
+            const { error: resendError } = await supabase.auth.resend({
+              type: 'signup',
+              email,
             });
+
+            if (resendError) {
+              console.error('Error resending verification email:', resendError);
+              toast({
+                title: "Error resending verification email",
+                description: resendError.message,
+                variant: "destructive",
+              });
+            } else {
+              toast({
+                title: "Email not verified",
+                description: "We've sent a new verification email. Please check your inbox and spam folder.",
+                variant: "destructive",
+              });
+            }
             setLoading(false);
             return;
           }
@@ -99,25 +114,40 @@ export const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
           onAuthSuccess();
         }
       } else {
+        console.log('Attempting to sign up with email:', email);
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
-            emailRedirectTo: window.location.origin,
+            emailRedirectTo: `${window.location.origin}/auth/callback`,
+            data: {
+              email: email,
+            }
           }
         });
+
+        console.log('Signup response:', { data, error });
 
         if (error) throw error;
 
         if (data?.user) {
+          console.log('User created:', data.user);
           setShowConfirmation(true);
           toast({
             title: "Verification email sent",
-            description: "Please check your email to verify your account.",
+            description: "Please check your email (including spam folder) to verify your account.",
+          });
+        } else {
+          console.error('No user data returned from signup');
+          toast({
+            title: "Error",
+            description: "Failed to create account. Please try again.",
+            variant: "destructive",
           });
         }
       }
     } catch (error: any) {
+      console.error('Auth error:', error);
       if (error.message === "User already registered") {
         toast({
           title: "Account exists",
@@ -143,7 +173,34 @@ export const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
         <div className="space-y-2 text-center">
           <h1 className="text-3xl font-bold tracking-tight">Check Your Email</h1>
           <p className="text-muted-foreground">
-            We've sent you a verification link to {email}. Please check your email and click the link to verify your account.
+            We've sent you a verification link to {email}. Please check your email (including spam folder) to verify your account.
+          </p>
+          <p className="text-sm text-muted-foreground mt-2">
+            Didn't receive the email? Check your spam folder or{' '}
+            <button
+              onClick={async () => {
+                try {
+                  const { error } = await supabase.auth.resend({
+                    type: 'signup',
+                    email,
+                  });
+                  if (error) throw error;
+                  toast({
+                    title: "Email resent",
+                    description: "Please check your inbox and spam folder.",
+                  });
+                } catch (error: any) {
+                  toast({
+                    title: "Error",
+                    description: error.message,
+                    variant: "destructive",
+                  });
+                }
+              }}
+              className="text-primary hover:underline"
+            >
+              click here to resend
+            </button>
           </p>
           <Button
             onClick={() => {
