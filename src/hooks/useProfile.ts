@@ -7,21 +7,42 @@ export const useProfile = () => {
     queryKey: ["profile"],
     queryFn: async (): Promise<Profile> => {
       const { data: { user } } = await supabase.auth.getUser();
-      console.log("Current user:", user); // Debug log
+      console.log("Current user:", user);
 
       if (!user) throw new Error("Not authenticated");
 
-      const { data, error } = await supabase
+      // First try to get existing profile
+      const { data: existingProfile, error: fetchError } = await supabase
         .from("profiles")
         .select("*")
         .eq("id", user.id)
         .single();
 
-      console.log("Profile data:", data); // Debug log
-      console.log("Profile error:", error); // Debug log
+      console.log("Existing profile:", existingProfile);
+      console.log("Fetch error:", fetchError);
 
-      if (error) throw error;
-      return data;
+      // If profile exists, return it
+      if (existingProfile) return existingProfile;
+
+      // If no profile exists, create one
+      const { data: newProfile, error: insertError } = await supabase
+        .from("profiles")
+        .insert([
+          {
+            id: user.id,
+            email: user.email,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          },
+        ])
+        .select()
+        .single();
+
+      console.log("New profile:", newProfile);
+      console.log("Insert error:", insertError);
+
+      if (insertError) throw insertError;
+      return newProfile;
     },
   });
 };
