@@ -141,6 +141,9 @@ const Index = () => {
               id={child.id}
               name={child.name}
               age={child.age}
+              gender={child.gender}
+              height={child.height}
+              weight={child.weight}
               achievements={child.achievements}
               onDelete={() => handleDeleteChild(child.id)}
             />

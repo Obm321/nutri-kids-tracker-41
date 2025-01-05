@@ -14,7 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 
 interface AddChildDialogProps {
@@ -27,15 +27,39 @@ interface AddChildDialogProps {
     height: string;
     weight: string;
   }) => void;
+  initialData?: {
+    name: string;
+    age: number;
+    gender: string;
+    height: string;
+    weight: string;
+  };
+  isEditing?: boolean;
 }
 
-export const AddChildDialog = ({ open, onOpenChange, onAddChild }: AddChildDialogProps) => {
+export const AddChildDialog = ({ 
+  open, 
+  onOpenChange, 
+  onAddChild,
+  initialData,
+  isEditing = false
+}: AddChildDialogProps) => {
   const [name, setName] = useState("");
   const [age, setAge] = useState("");
   const [gender, setGender] = useState("");
   const [height, setHeight] = useState("");
   const [weight, setWeight] = useState("");
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (initialData) {
+      setName(initialData.name);
+      setAge(initialData.age.toString());
+      setGender(initialData.gender);
+      setHeight(initialData.height);
+      setWeight(initialData.weight);
+    }
+  }, [initialData]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,24 +81,25 @@ export const AddChildDialog = ({ open, onOpenChange, onAddChild }: AddChildDialo
       weight,
     });
 
-    toast({
-      title: "Success",
-      description: "Child profile created successfully.",
-    });
-
-    onOpenChange(false);
-    setName("");
-    setAge("");
-    setGender("");
-    setHeight("");
-    setWeight("");
+    if (!isEditing) {
+      toast({
+        title: "Success",
+        description: "Child profile created successfully.",
+      });
+      onOpenChange(false);
+      setName("");
+      setAge("");
+      setGender("");
+      setHeight("");
+      setWeight("");
+    }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px] bg-white">
         <DialogHeader>
-          <DialogTitle>Add Child Profile</DialogTitle>
+          <DialogTitle>{isEditing ? 'Edit Child Profile' : 'Add Child Profile'}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
@@ -134,7 +159,7 @@ export const AddChildDialog = ({ open, onOpenChange, onAddChild }: AddChildDialo
           </div>
 
           <Button type="submit" className="w-full">
-            Create Profile
+            {isEditing ? 'Update Profile' : 'Create Profile'}
           </Button>
         </form>
       </DialogContent>

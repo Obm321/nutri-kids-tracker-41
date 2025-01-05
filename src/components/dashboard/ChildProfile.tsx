@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Settings, Edit, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,6 +20,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useState } from "react";
 import { createClient } from '@supabase/supabase-js';
+import { AddChildDialog } from "./AddChildDialog";
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -37,19 +39,28 @@ interface ChildProfileProps {
   onEdit?: () => void;
   onDelete?: () => void;
   id?: string;
+  gender?: string;
+  height?: string;
+  weight?: string;
 }
 
 export const ChildProfile = ({ 
   name, 
   age, 
-  achievements, 
+  achievements,
+  gender,
+  height,
+  weight,
   onClick,
   onEdit,
   onDelete,
   id 
 }: ChildProfileProps) => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [childData, setChildData] = useState<any>(null);
 
   const handleEdit = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -62,7 +73,8 @@ export const ChildProfile = ({
           .single();
           
         if (error) throw error;
-        onEdit?.();
+        setChildData(data);
+        setShowEditDialog(true);
       } catch (error) {
         console.error('Error fetching child data:', error);
         toast({
@@ -106,11 +118,44 @@ export const ChildProfile = ({
     }
   };
 
+  const handleUpdateChild = async (updatedData: any) => {
+    if (id) {
+      try {
+        const { error } = await supabase
+          .from('children')
+          .update(updatedData)
+          .eq('id', id);
+
+        if (error) throw error;
+
+        toast({
+          title: "Success",
+          description: "Child profile updated successfully.",
+        });
+        setShowEditDialog(false);
+        window.location.reload(); // Refresh to show updated data
+      } catch (error) {
+        console.error('Error updating child:', error);
+        toast({
+          title: "Error",
+          description: "Could not update child profile. Please try again.",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
+  const handleCardClick = () => {
+    if (id) {
+      navigate(`/child/${id}`);
+    }
+  };
+
   return (
     <>
       <Card 
         className="p-4 sm:p-6 animate-fadeIn cursor-pointer relative"
-        onClick={onClick}
+        onClick={handleCardClick}
       >
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -177,6 +222,16 @@ export const ChildProfile = ({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {showEditDialog && childData && (
+        <AddChildDialog
+          open={showEditDialog}
+          onOpenChange={setShowEditDialog}
+          onAddChild={handleUpdateChild}
+          initialData={childData}
+          isEditing={true}
+        />
+      )}
     </>
   );
 };
