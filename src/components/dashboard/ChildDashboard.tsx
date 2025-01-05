@@ -7,6 +7,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
+import { MealService } from "@/services/meals";
 
 export const ChildDashboard = () => {
   const { id } = useParams();
@@ -17,7 +18,7 @@ export const ChildDashboard = () => {
   const [selectedMealType, setSelectedMealType] = useState<string | null>(null);
   const [showMealTypeMenu, setShowMealTypeMenu] = useState(false);
 
-  const { data: childData, isLoading, error } = useQuery({
+  const { data: childData, isLoading: childLoading, error: childError } = useQuery({
     queryKey: ["child", id],
     queryFn: async () => {
       if (!id) {
@@ -29,7 +30,7 @@ export const ChildDashboard = () => {
         .from("children")
         .select("*")
         .eq("id", id)
-        .maybeSingle(); // Using maybeSingle() instead of single()
+        .maybeSingle();
 
       if (error) throw error;
       if (!data) {
@@ -38,21 +39,26 @@ export const ChildDashboard = () => {
       console.log("Child data:", data);
       return data;
     },
-    retry: false, // Don't retry if child not found
+    retry: false,
+  });
+
+  const { data: mealsData, isLoading: mealsLoading } = useQuery({
+    queryKey: ['meals', id, selectedDate],
+    queryFn: () => MealService.getMealsByChildAndDate(id!, selectedDate),
+    enabled: !!id,
   });
 
   useEffect(() => {
-    if (error) {
-      console.error("Error fetching child:", error);
+    if (childError) {
+      console.error("Error fetching child:", childError);
       toast({
         title: "Error",
         description: "Child not found. Redirecting to dashboard...",
         variant: "destructive",
       });
-      // Redirect after a short delay so user can see the message
       setTimeout(() => navigate('/'), 2000);
     }
-  }, [error, navigate, toast]);
+  }, [childError, navigate, toast]);
 
   const handleMealLog = (type?: string) => {
     setSelectedMealType(type || null);
@@ -66,11 +72,15 @@ export const ChildDashboard = () => {
     setShowMealTypeMenu(true);
   };
 
-  if (isLoading) {
+  const getMealByType = (type: string) => {
+    return mealsData?.find(meal => meal.type.toLowerCase() === type.toLowerCase());
+  };
+
+  if (childLoading) {
     return <div className="min-h-screen bg-muted flex items-center justify-center">Loading...</div>;
   }
 
-  if (error || !childData) {
+  if (childError || !childData) {
     return <div className="min-h-screen bg-muted flex items-center justify-center">Child not found</div>;
   }
 
@@ -125,28 +135,46 @@ export const ChildDashboard = () => {
           </div>
         </div>
 
-        {mealTypes.map((mealType) => (
-          <div key={mealType} className="bg-white rounded-lg p-4 shadow-sm">
-            <div className="flex justify-between items-center mb-2">
-              <div className="flex items-center gap-2">
-                <h3 className="font-medium">{mealType}</h3>
-                <span className="text-sm text-muted-foreground">0kcal</span>
+        {mealTypes.map((mealType) => {
+          const meal = getMealByType(mealType);
+          return (
+            <div key={mealType} className="bg-white rounded-lg p-4 shadow-sm">
+              <div className="flex justify-between items-center mb-2">
+                <div className="flex items-center gap-2">
+                  <h3 className="font-medium">{mealType}</h3>
+                  <span className="text-sm text-muted-foreground">0kcal</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <span className="text-[#FCD34D]">C 0g</span>
+                  <span className="text-[#4ADE80]">P 0g</span>
+                  <span className="text-[#60A5FA]">F 0g</span>
+                </div>
               </div>
-              <div className="flex items-center gap-2 text-sm">
-                <span className="text-[#FCD34D]">C 0g</span>
-                <span className="text-[#4ADE80]">P 0g</span>
-                <span className="text-[#60A5FA]">F 0g</span>
+              <div 
+                className="h-32 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:bg-muted/80 transition-colors overflow-hidden"
+                onClick={() => handleMealLog(mealType.toLowerCase())}
+              >
+                {meal?.photo_url ? (
+                  <div className="w-full h-full relative">
+                    <img 
+                      src={meal.photo_url} 
+                      alt={meal.name}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
+                      <span className="text-white font-medium">{meal.name}</span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="bg-muted w-full h-full flex flex-col items-center justify-center">
+                    <span className="text-4xl mb-2">☺</span>
+                    <span className="text-muted-foreground">Please Record your diet information!</span>
+                  </div>
+                )}
               </div>
             </div>
-            <div 
-              className="h-32 bg-muted rounded-lg flex flex-col items-center justify-center cursor-pointer hover:bg-muted/80 transition-colors"
-              onClick={() => handleMealLog(mealType.toLowerCase())}
-            >
-              <span className="text-4xl mb-2">☺</span>
-              <span className="text-muted-foreground">Please Record your diet information!</span>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </main>
 
       <Button
