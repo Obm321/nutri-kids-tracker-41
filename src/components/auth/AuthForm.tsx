@@ -37,6 +37,13 @@ export const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
   };
 
   const createProfile = async (userId: string, userEmail: string) => {
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) {
+      console.error("No session available");
+      return;
+    }
+
     try {
       const { error: profileError } = await supabase
         .from("profiles")
@@ -72,6 +79,9 @@ export const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
         if (error) throw error;
 
         if (data?.user) {
+          // Create/update profile after successful login
+          await createProfile(data.user.id, data.user.email || '');
+          
           toast({
             title: "Welcome back!",
             description: "You have successfully logged in.",
@@ -83,16 +93,11 @@ export const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
-          options: {
-            emailRedirectTo: window.location.origin,
-          },
         });
 
         if (error) throw error;
 
         if (data?.user) {
-          await createProfile(data.user.id, data.user.email || '');
-          
           // After successful registration, automatically log in the user
           const { error: signInError } = await supabase.auth.signInWithPassword({
             email,
@@ -101,6 +106,9 @@ export const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
 
           if (signInError) throw signInError;
 
+          // Create profile after successful login
+          await createProfile(data.user.id, data.user.email || '');
+          
           toast({
             title: "Account created successfully!",
             description: "You have been automatically logged in.",
