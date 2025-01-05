@@ -16,6 +16,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { format } from "date-fns";
 
 interface ChildDashboardProps {
   child: {
@@ -42,7 +43,14 @@ export const ChildDashboard = ({ child }: ChildDashboardProps) => {
 
   return (
     <div className="min-h-screen bg-muted">
-      <div className="sticky top-0 z-10">
+      <div className="sticky top-0 z-10 bg-background">
+        <div className="border-b p-4">
+          <div className="container mx-auto">
+            <div className="text-2xl font-bold text-center">
+              {format(selectedDate, 'EEEE, MMMM do, yyyy')}
+            </div>
+          </div>
+        </div>
         <Calendar onDateSelect={setSelectedDate} selectedDate={selectedDate} />
       </div>
 
