@@ -7,25 +7,17 @@ import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 
-interface ChildDashboardProps {
-  child?: {
-    name: string;
-    age: number;
-    gender: string;
-    height: string;
-    weight: string;
-  };
-}
-
-export const ChildDashboard = ({ child }: ChildDashboardProps) => {
+export const ChildDashboard = () => {
   const { id } = useParams();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showMealLog, setShowMealLog] = useState(false);
   const [selectedMealType, setSelectedMealType] = useState<string | null>(null);
 
-  const { data: childData } = useQuery({
+  const { data: childData, isLoading } = useQuery({
     queryKey: ["child", id],
     queryFn: async () => {
+      if (!id) throw new Error("No child ID provided");
+      console.log("Fetching child data for ID:", id);
       const { data, error } = await supabase
         .from("children")
         .select("*")
@@ -33,6 +25,7 @@ export const ChildDashboard = ({ child }: ChildDashboardProps) => {
         .single();
 
       if (error) throw error;
+      console.log("Child data:", data);
       return data;
     },
   });
@@ -44,19 +37,17 @@ export const ChildDashboard = ({ child }: ChildDashboardProps) => {
 
   const mealTypes = ["Breakfast", "Lunch", "Dinner", "Snack"];
 
-  if (!childData) {
-    return <div>Loading...</div>;
+  if (isLoading || !childData) {
+    return <div className="min-h-screen bg-muted flex items-center justify-center">Loading...</div>;
   }
 
   return (
     <div className="min-h-screen bg-muted">
-      <div className="sticky top-0 z-10 bg-background">
-        <Calendar onDateSelect={setSelectedDate} selectedDate={selectedDate} />
-      </div>
+      <Calendar onDateSelect={setSelectedDate} selectedDate={selectedDate} />
 
       <main className="container px-4 py-6 space-y-6">
-        {/* Nutrition Summary */}
         <div className="bg-white rounded-lg p-4 shadow-sm">
+          <h2 className="text-xl font-bold mb-4">{childData.name}'s Dashboard</h2>
           <h3 className="text-lg mb-2">total intake 0 / 2851kcal</h3>
           <div className="space-y-4">
             <div>
@@ -89,7 +80,6 @@ export const ChildDashboard = ({ child }: ChildDashboardProps) => {
           </div>
         </div>
 
-        {/* Meal Sections */}
         {mealTypes.map((mealType) => (
           <div key={mealType} className="bg-white rounded-lg p-4 shadow-sm">
             <div className="flex justify-between items-center mb-2">
