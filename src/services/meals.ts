@@ -16,10 +16,15 @@ export const MealService = {
     dateTime: Date;
   }) {
     try {
+      console.log('Starting meal creation process...', { childId, name, type, dateTime });
+      
       // First upload the photo
+      console.log('Uploading photo...');
       const photoUrl = await StorageService.uploadFile('meal-photos', photoFile);
+      console.log('Photo uploaded successfully:', photoUrl);
 
       // Then create the meal record
+      console.log('Creating meal record in database...');
       const { data: meal, error: insertError } = await supabase
         .from('meals')
         .insert([
@@ -43,14 +48,17 @@ export const MealService = {
         throw insertError;
       }
 
+      console.log('Meal created successfully:', meal);
       return meal;
     } catch (error) {
-      console.error('Error saving meal:', error);
+      console.error('Error in createMeal:', error);
       throw error;
     }
   },
 
   async getMealsByChildAndDate(childId: string, date: Date) {
+    console.log('Fetching meals for child:', childId, 'date:', date);
+    
     const startOfDay = new Date(date);
     startOfDay.setHours(0, 0, 0, 0);
     
@@ -70,6 +78,7 @@ export const MealService = {
       throw error;
     }
 
+    console.log('Fetched meals:', data);
     return data;
   }
 };
