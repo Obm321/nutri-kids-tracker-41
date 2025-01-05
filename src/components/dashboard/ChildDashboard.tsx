@@ -2,7 +2,7 @@ import { Calendar } from "./Calendar";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MealLogDialog } from "./MealLogDialog";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
@@ -29,6 +29,11 @@ export const ChildDashboard = () => {
       return data;
     },
   });
+
+  // Force a component remount when the ID changes
+  useEffect(() => {
+    console.log("Child ID changed:", id);
+  }, [id]);
 
   const handleMealLog = (type?: string) => {
     setSelectedMealType(type || null);

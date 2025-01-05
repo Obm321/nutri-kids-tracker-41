@@ -19,17 +19,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useState } from "react";
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from "@/lib/supabase";
 import { AddChildDialog } from "./AddChildDialog";
-
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables');
-}
-
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 interface ChildProfileProps {
   name: string;
@@ -65,7 +56,8 @@ export const ChildProfile = ({
   const handleCardClick = () => {
     if (id) {
       console.log("Navigating to child:", id);
-      navigate(`/child/${id}`);
+      // Force a page reload after navigation
+      window.location.href = `/child/${id}`;
     }
   };
 
