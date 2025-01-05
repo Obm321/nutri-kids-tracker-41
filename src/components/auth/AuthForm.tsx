@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -16,6 +16,23 @@ export const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
   const [loading, setLoading] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const { toast } = useToast();
+
+  // Handle URL error parameters on component mount
+  useEffect(() => {
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    const error = hashParams.get('error');
+    const errorDescription = hashParams.get('error_description');
+
+    if (error === 'access_denied' && errorDescription?.includes('expired')) {
+      toast({
+        title: "Link Expired",
+        description: "Your verification link has expired. Please request a new one.",
+        variant: "destructive",
+      });
+      // Clear the URL hash
+      window.history.replaceState(null, '', window.location.pathname);
+    }
+  }, [toast]);
 
   const validateForm = () => {
     if (!email || !email.includes('@')) {
@@ -82,7 +99,6 @@ export const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
 
         if (data?.user) {
           if (!data.user.email_confirmed_at) {
-            // Resend verification email if user is not verified
             const { error: resendError } = await supabase.auth.resend({
               type: 'signup',
               email,
@@ -115,11 +131,12 @@ export const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
         }
       } else {
         console.log('Attempting to sign up with email:', email);
+        const siteUrl = window.location.origin;
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
-            emailRedirectTo: `${window.location.origin}/auth/callback`,
+            emailRedirectTo: `${siteUrl}/auth/callback`,
             data: {
               email: email,
             }
@@ -135,7 +152,7 @@ export const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
           setShowConfirmation(true);
           toast({
             title: "Verification email sent",
-            description: "Please check your email (including spam folder) to verify your account.",
+            description: "Please check your email (including spam folder) to verify your account. The link will expire in 1 hour.",
           });
         } else {
           console.error('No user data returned from signup');
@@ -174,6 +191,7 @@ export const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
           <h1 className="text-3xl font-bold tracking-tight">Check Your Email</h1>
           <p className="text-muted-foreground">
             We've sent you a verification link to {email}. Please check your email (including spam folder) to verify your account.
+            The link will expire in 1 hour.
           </p>
           <p className="text-sm text-muted-foreground mt-2">
             Didn't receive the email? Check your spam folder or{' '}
@@ -187,7 +205,7 @@ export const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
                   if (error) throw error;
                   toast({
                     title: "Email resent",
-                    description: "Please check your inbox and spam folder.",
+                    description: "Please check your inbox and spam folder. The link will expire in 1 hour.",
                   });
                 } catch (error: any) {
                   toast({
