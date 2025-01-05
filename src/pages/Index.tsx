@@ -16,15 +16,21 @@ const Index = () => {
   useEffect(() => {
     checkUser();
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      console.log("Auth state changed:", _event, session);
       setIsAuthenticated(!!session);
+      if (session) {
+        // Invalidate and refetch profile data when session changes
+        queryClient.invalidateQueries({ queryKey: ["profile"] });
+      }
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [queryClient]);
 
   const checkUser = async () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
+      console.log("Current session:", session);
       setIsAuthenticated(!!session);
     } catch (error) {
       console.error('Error checking auth status:', error);
