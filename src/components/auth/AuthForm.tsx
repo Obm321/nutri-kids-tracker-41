@@ -10,7 +10,7 @@ interface AuthFormProps {
 }
 
 export const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
-  const [isLogin, setIsLogin] = useState(false); // Default to signup
+  const [isLogin, setIsLogin] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -82,7 +82,6 @@ export const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
 
           if (profileError) {
             console.error("Error creating profile:", profileError);
-            // Continue anyway as the user is created
           }
 
           toast({

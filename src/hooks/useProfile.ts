@@ -10,32 +10,46 @@ export const useProfile = () => {
       
       if (!user) throw new Error("Not authenticated");
 
+      console.log("Fetching profile for user:", user.id);
+
       // First try to get existing profile
-      let { data: profile, error } = await supabase
+      const { data: existingProfile, error: fetchError } = await supabase
         .from("profiles")
         .select("*")
         .eq("id", user.id)
-        .single();
+        .maybeSingle();
 
-      if (error && error.code === "PGRST116") {
-        // Profile doesn't exist, create it
-        const { data: newProfile, error: createError } = await supabase
-          .from("profiles")
-          .insert({
-            id: user.id,
-            email: user.email,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          })
-          .select()
-          .single();
-
-        if (createError) throw createError;
-        return newProfile;
+      if (fetchError && fetchError.code !== "PGRST116") {
+        console.error("Error fetching profile:", fetchError);
+        throw fetchError;
       }
 
-      if (error) throw error;
-      return profile;
+      if (existingProfile) {
+        console.log("Found existing profile:", existingProfile);
+        return existingProfile;
+      }
+
+      console.log("No profile found, creating new profile");
+
+      // Create new profile if none exists
+      const { data: newProfile, error: createError } = await supabase
+        .from("profiles")
+        .insert({
+          id: user.id,
+          email: user.email,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .select()
+        .single();
+
+      if (createError) {
+        console.error("Error creating profile:", createError);
+        throw createError;
+      }
+
+      console.log("Created new profile:", newProfile);
+      return newProfile;
     },
     retry: 1,
   });
