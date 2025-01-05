@@ -23,7 +23,24 @@ export const MealService = {
       const photoUrl = await StorageService.uploadFile('meal-photos', photoFile);
       console.log('Photo uploaded successfully:', photoUrl);
 
-      // Then create the meal record
+      // Get nutrition information from Spoonacular
+      console.log('Analyzing meal nutrition...');
+      const response = await fetch('/functions/analyze-meal', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ mealName: name })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to analyze meal nutrition');
+      }
+
+      const nutritionData = await response.json();
+      console.log('Nutrition data:', nutritionData);
+
+      // Then create the meal record with nutrition data
       console.log('Creating meal record in database...');
       const { data: meal, error: insertError } = await supabase
         .from('meals')
@@ -34,10 +51,10 @@ export const MealService = {
             type,
             photo_url: photoUrl,
             date: dateTime.toISOString(),
-            calories: 0, // These will be updated later when we add nutrition calculation
-            carbs: 0,
-            protein: 0,
-            fat: 0,
+            calories: nutritionData.calories,
+            carbs: nutritionData.carbs,
+            protein: nutritionData.protein,
+            fat: nutritionData.fat,
           }
         ])
         .select()
