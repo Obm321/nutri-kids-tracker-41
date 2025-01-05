@@ -62,6 +62,12 @@ export const ChildProfile = ({
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [childData, setChildData] = useState<any>(null);
 
+  const handleCardClick = () => {
+    if (id) {
+      navigate(`/child/${id}`);
+    }
+  };
+
   const handleEdit = async (e: React.MouseEvent) => {
     e.stopPropagation();
     if (id) {
@@ -142,12 +148,6 @@ export const ChildProfile = ({
           variant: "destructive",
         });
       }
-    }
-  };
-
-  const handleCardClick = () => {
-    if (id) {
-      navigate(`/child/${id}`);
     }
   };
 

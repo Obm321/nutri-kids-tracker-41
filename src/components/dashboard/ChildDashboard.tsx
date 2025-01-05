@@ -16,7 +16,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { format } from "date-fns";
 
 interface ChildDashboardProps {
   child: {
@@ -44,122 +43,75 @@ export const ChildDashboard = ({ child }: ChildDashboardProps) => {
   return (
     <div className="min-h-screen bg-muted">
       <div className="sticky top-0 z-10 bg-background">
-        <div className="border-b p-4">
-          <div className="container mx-auto">
-            <div className="text-2xl font-bold text-center">
-              {format(selectedDate, 'EEEE, MMMM do, yyyy')}
-            </div>
-          </div>
-        </div>
         <Calendar onDateSelect={setSelectedDate} selectedDate={selectedDate} />
       </div>
 
-      <div className="p-4 bg-white border-b">
-        <div className="container mx-auto">
-          <Button 
-            variant="ghost" 
-            size="icon"
-            onClick={() => navigate("/")}
-            className="mb-4"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <div className="flex items-center gap-4">
-            <div className="h-12 w-12 rounded-full bg-primary flex items-center justify-center">
-              <span className="text-xl font-bold text-white">
-                {child.name.charAt(0)}
-              </span>
+      <main className="container px-4 py-6 space-y-6">
+        {/* Nutrition Summary */}
+        <div className="bg-white rounded-lg p-4 shadow-sm">
+          <h3 className="text-lg mb-2">total intake 0 / 2851kcal</h3>
+          <div className="space-y-4">
+            <div>
+              <div className="flex justify-between mb-1">
+                <span>Carbohydrate</span>
+                <span>0/463g</span>
+              </div>
+              <div className="h-2 bg-gray-200 rounded">
+                <div className="h-full bg-[#FCD34D] rounded" style={{ width: '0%' }}></div>
+              </div>
             </div>
             <div>
-              <h2 className="text-xl font-bold">{child.name}</h2>
-              <p className="text-sm text-muted-foreground">
-                {child.age} years • {child.height}cm • {child.weight}kg
-              </p>
+              <div className="flex justify-between mb-1">
+                <span>Protein</span>
+                <span>0/143g</span>
+              </div>
+              <div className="h-2 bg-gray-200 rounded">
+                <div className="h-full bg-[#4ADE80] rounded" style={{ width: '0%' }}></div>
+              </div>
             </div>
-          </div>
-        </div>
-      </div>
-
-      <main className="container px-4 py-6 space-y-6">
-        {/* Nutrition Goals */}
-        <div className="bg-white rounded-lg p-4 shadow-sm">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="font-semibold">Today's Nutrition Goals</h3>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger>
-                  <Info className="h-5 w-5 text-muted-foreground" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Daily nutritional goals based on age and activity level</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <span>Calories</span>
-              <span>0 / 2000 kcal</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span>Protein</span>
-              <span>0 / 50 g</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span>Carbs</span>
-              <span>0 / 250 g</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span>Fat</span>
-              <span>0 / 70 g</span>
+            <div>
+              <div className="flex justify-between mb-1">
+                <span>Fat</span>
+                <span>0/86g</span>
+              </div>
+              <div className="h-2 bg-gray-200 rounded">
+                <div className="h-full bg-[#60A5FA] rounded" style={{ width: '0%' }}></div>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Meal Sections */}
-        <div className="space-y-4">
-          {mealTypes.map((mealType) => (
-            <div key={mealType} className="bg-white rounded-lg p-4 shadow-sm">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="font-semibold">{mealType}</h3>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <Info className="h-5 w-5 text-muted-foreground" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Nutritional information for {mealType.toLowerCase()}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+        {mealTypes.map((mealType) => (
+          <div key={mealType} className="bg-white rounded-lg p-4 shadow-sm">
+            <div className="flex justify-between items-center mb-2">
+              <div className="flex items-center gap-2">
+                <h3 className="font-medium">{mealType}</h3>
+                <span className="text-sm text-muted-foreground">0kcal</span>
               </div>
-              <div 
-                className="h-32 bg-muted rounded-lg flex items-center justify-center cursor-pointer hover:bg-muted/80 transition-colors"
-                onClick={() => handleMealLog(mealType.toLowerCase())}
-              >
-                <span className="text-muted-foreground">No meals logged yet</span>
+              <div className="flex items-center gap-2 text-sm">
+                <span className="text-[#FCD34D]">C 0g</span>
+                <span className="text-[#4ADE80]">P 0g</span>
+                <span className="text-[#60A5FA]">F 0g</span>
               </div>
             </div>
-          ))}
-        </div>
+            <div 
+              className="h-32 bg-muted rounded-lg flex flex-col items-center justify-center cursor-pointer hover:bg-muted/80 transition-colors"
+              onClick={() => handleMealLog(mealType.toLowerCase())}
+            >
+              <span className="text-4xl mb-2">☺</span>
+              <span className="text-muted-foreground">Please Record your diet information!</span>
+            </div>
+          </div>
+        ))}
       </main>
 
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            className="fixed bottom-6 right-6 rounded-full h-12 w-12 p-0 shadow-lg"
-          >
-            <Plus className="h-6 w-6" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          {mealTypes.map((type) => (
-            <DropdownMenuItem key={type} onClick={() => handleMealLog(type.toLowerCase())}>
-              Add {type}
-            </DropdownMenuItem>
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <Button
+        className="fixed bottom-6 right-6 rounded-full h-12 w-12 p-0 shadow-lg bg-secondary hover:bg-secondary/90"
+        onClick={() => handleMealLog()}
+      >
+        <Plus className="h-6 w-6" />
+      </Button>
 
       {showMealLog && (
         <MealLogDialog

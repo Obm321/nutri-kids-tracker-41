@@ -41,9 +41,13 @@ export const Calendar = ({ selectedDate, onDateSelect }: CalendarProps) => {
            date1.getFullYear() === date2.getFullYear();
   };
 
+  const getMonthInJapanese = (date: Date) => {
+    return `${date.getMonth() + 1}月`;
+  };
+
   return (
     <div 
-      className="bg-secondary w-full p-4 text-white rounded-t-lg select-none"
+      className="bg-secondary w-full p-4 text-white select-none"
       onMouseDown={(e) => {
         isDraggingRef.current = true;
         startXRef.current = e.clientX;
@@ -79,7 +83,7 @@ export const Calendar = ({ selectedDate, onDateSelect }: CalendarProps) => {
     >
       <div className="grid grid-cols-7 gap-4 text-center">
         {days.map((day) => (
-          <div key={day} className="font-semibold">
+          <div key={day} className="text-sm font-medium">
             {day}
           </div>
         ))}
@@ -87,10 +91,19 @@ export const Calendar = ({ selectedDate, onDateSelect }: CalendarProps) => {
           <div 
             key={index} 
             onClick={() => onDateSelect?.(date)}
-            className={`text-lg p-2 rounded-full cursor-pointer transition-colors
-              ${isSameDay(date, selectedDate || today) ? 'bg-white text-secondary' : 'hover:bg-white/10'}`}
+            className={`relative text-lg cursor-pointer transition-colors
+              ${isSameDay(date, selectedDate || today) ? 
+                'bg-white text-secondary rounded-full w-12 h-12 flex items-center justify-center mx-auto' : 
+                'hover:bg-white/10'}`}
           >
-            {date.getDate()}
+            {isSameDay(date, selectedDate || today) ? (
+              <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-white text-secondary rounded-full w-16 h-16 flex flex-col items-center justify-center">
+                <span className="text-xs">{getMonthInJapanese(date)}</span>
+                <span className="text-xl">{date.getDate()}</span>
+              </div>
+            ) : (
+              date.getDate()
+            )}
           </div>
         ))}
       </div>
