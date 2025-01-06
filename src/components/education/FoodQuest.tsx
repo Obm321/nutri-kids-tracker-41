@@ -57,6 +57,16 @@ const FoodQuest = () => {
     return <div>Error: World data not found</div>;
   }
 
+  const getProgressColor = (level: number) => {
+    const colors = [
+      'bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500',  // Rainbow gradient
+      'bg-gradient-to-r from-yellow-300 via-orange-400 to-red-500',   // Sunset gradient
+      'bg-gradient-to-r from-green-300 via-emerald-400 to-teal-500',  // Forest gradient
+      'bg-gradient-to-r from-blue-300 via-cyan-400 to-indigo-500'     // Ocean gradient
+    ];
+    return colors[level % colors.length];
+  };
+
   const collectPower = () => {
     setIsCollecting(true);
     const powerGain = 20;
@@ -86,15 +96,17 @@ const FoodQuest = () => {
   };
 
   return (
-    <Card className="p-6 max-w-2xl mx-auto">
+    <Card className="p-6 max-w-2xl mx-auto bg-gradient-to-b from-white to-blue-50">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">Food Hero Adventure</h2>
-        <div className="bg-primary/10 text-primary px-3 py-1 rounded-full animate-pulse">
+        <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary">
+          Food Hero Adventure
+        </h2>
+        <div className="bg-gradient-to-r from-primary/20 to-secondary/20 text-primary px-3 py-1 rounded-full animate-pulse">
           Level {heroLevel}
         </div>
       </div>
 
-      <Card className="p-4 mb-6 hover:shadow-lg transition-shadow duration-300">
+      <Card className="p-4 mb-6 hover:shadow-lg transition-shadow duration-300 bg-white/80 backdrop-blur-sm">
         <div className="flex items-center gap-2 mb-2">
           {currentWorldData.iconName === 'Apple' ? (
             <Apple className="h-6 w-6 text-red-500 animate-bounce" />
@@ -113,7 +125,7 @@ const FoodQuest = () => {
             {unlockedFacts.map((fact, index) => (
               <div
                 key={index}
-                className="bg-muted p-3 rounded-lg text-sm transform hover:scale-105 transition-transform duration-200 animate-slideIn"
+                className="bg-white/80 backdrop-blur-sm p-3 rounded-lg text-sm transform hover:scale-105 transition-transform duration-200 animate-slideIn shadow-sm hover:shadow-md border border-primary/10"
                 style={{
                   animationDelay: `${index * 150}ms`
                 }}
@@ -126,19 +138,23 @@ const FoodQuest = () => {
       )}
 
       <div className="space-y-2 mb-6">
-        <div className="flex justify-between text-sm">
+        <div className="flex justify-between text-sm font-medium">
           <span>Power Level</span>
           <span>{powerLevel}%</span>
         </div>
-        <Progress 
-          value={powerLevel} 
-          className="h-2 transition-all duration-500"
-        />
+        <div className="h-4 bg-gray-100 rounded-full overflow-hidden">
+          <div
+            className={`h-full ${getProgressColor(heroLevel)} transition-all duration-500 animate-pulse`}
+            style={{ width: `${powerLevel}%` }}
+          />
+        </div>
       </div>
 
       <Button
         className={`w-full transform transition-all duration-300 ${
-          isCollecting ? 'animate-pulse scale-105' : 'hover:scale-105'
+          isCollecting 
+            ? 'animate-pulse scale-105 bg-gradient-to-r from-yellow-400 to-orange-500' 
+            : 'hover:scale-105 bg-gradient-to-r from-primary to-secondary hover:opacity-90'
         }`}
         size="lg"
         onClick={collectPower}
@@ -155,7 +171,7 @@ const FoodQuest = () => {
             {unlockedPowers.map((power, index) => (
               <div
                 key={index}
-                className="bg-primary/10 text-primary text-xs px-3 py-1 rounded-full hover:scale-110 transition-transform duration-200"
+                className="bg-gradient-to-r from-primary/10 to-secondary/10 text-primary text-xs px-3 py-1 rounded-full hover:scale-110 transition-transform duration-200 hover:shadow-md"
               >
                 {power}
               </div>
