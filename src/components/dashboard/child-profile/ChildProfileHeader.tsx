@@ -117,7 +117,7 @@ export const ChildProfileHeader = ({
         open={showDeleteConfirm} 
         onOpenChange={(open) => {
           if (!open) {
-            const syntheticEvent = {
+            handleCancelDelete({
               preventDefault: () => {},
               stopPropagation: () => {},
               target: null,
@@ -129,12 +129,11 @@ export const ChildProfileHeader = ({
               isTrusted: true,
               timeStamp: Date.now(),
               type: 'click',
-            } as React.MouseEvent;
-            handleCancelDelete(syntheticEvent);
+            } as React.MouseEvent);
           }
         }}
       >
-        <AlertDialogContent onClick={e => e.stopPropagation()}>
+        <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
