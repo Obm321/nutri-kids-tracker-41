@@ -50,6 +50,7 @@ export const ChildProfileHeader = ({
 
   const handleCancelDelete = () => {
     setShowDeleteConfirm(false);
+    setIsDropdownOpen(false);
   };
 
   const handleEditClick = (e: React.MouseEvent) => {
