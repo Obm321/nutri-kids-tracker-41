@@ -101,7 +101,7 @@ export const ChildProfileHeader = ({
       </div>
 
       <AlertDialog 
-        open={showDeleteConfirm} 
+        open={showDeleteConfirm}
         onOpenChange={setShowDeleteConfirm}
       >
         <AlertDialogContent>
