@@ -28,7 +28,7 @@ const Index = () => {
       setIsAuthenticated(!!session);
       if (session) {
         queryClient.invalidateQueries({ queryKey: ["profile"] });
-        fetchChildren(session.user.id);
+        fetchChildren();
       }
     });
 
@@ -41,7 +41,7 @@ const Index = () => {
       console.log("Current session:", session);
       setIsAuthenticated(!!session);
       if (session) {
-        await fetchChildren(session.user.id);
+        await fetchChildren();
       }
     } catch (error) {
       console.error('Error checking auth status:', error);
@@ -50,14 +50,14 @@ const Index = () => {
     }
   };
 
-  const fetchChildren = async (profileId: string) => {
+  const fetchChildren = async () => {
     try {
       const { data, error } = await supabase
         .from('children')
-        .select('*')
-        .eq('profile_id', profileId);
+        .select('*');
 
       if (error) throw error;
+      console.log("Fetched children:", data);
       setChildren(data || []);
     } catch (error) {
       console.error('Error fetching children:', error);
@@ -99,6 +99,7 @@ const Index = () => {
         title: "Success",
         description: "Child profile added successfully.",
       });
+      setShowAddChildDialog(false);
     } catch (error) {
       console.error('Error adding child:', error);
       toast({
@@ -149,6 +150,7 @@ const Index = () => {
               weight={child.weight}
               achievements={child.achievements}
               onDelete={() => handleDeleteChild(child.id)}
+              selectedDate={selectedDate}
             />
           ))}
           <AddChildColumn onClick={() => setShowAddChildDialog(true)} />
