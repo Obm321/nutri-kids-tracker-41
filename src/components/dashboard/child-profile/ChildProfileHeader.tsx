@@ -33,6 +33,7 @@ export const ChildProfileHeader = ({
   onMealLog,
 }: ChildProfileHeaderProps) => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const handleDeleteClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -47,9 +48,7 @@ export const ChildProfileHeader = ({
     onDelete(e);
   };
 
-  const handleCancelDelete = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleCancelDelete = () => {
     setShowDeleteConfirm(false);
   };
 
@@ -57,6 +56,7 @@ export const ChildProfileHeader = ({
     e.preventDefault();
     e.stopPropagation();
     onEdit(e);
+    setIsDropdownOpen(false);
   };
 
   const handleMealLogClick = (e: React.MouseEvent) => {
@@ -86,15 +86,9 @@ export const ChildProfileHeader = ({
           >
             <Camera className="w-5 h-5 text-muted-foreground" />
           </button>
-          <DropdownMenu>
+          <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
             <DropdownMenuTrigger asChild>
-              <button 
-                className="p-2 hover:bg-muted rounded-full"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                }}
-              >
+              <button className="p-2 hover:bg-muted rounded-full">
                 <Settings className="w-5 h-5 text-muted-foreground" />
               </button>
             </DropdownMenuTrigger>
@@ -115,23 +109,7 @@ export const ChildProfileHeader = ({
 
       <AlertDialog 
         open={showDeleteConfirm} 
-        onOpenChange={(open) => {
-          if (!open) {
-            handleCancelDelete({
-              preventDefault: () => {},
-              stopPropagation: () => {},
-              target: null,
-              currentTarget: null,
-              bubbles: true,
-              cancelable: true,
-              defaultPrevented: false,
-              eventPhase: 0,
-              isTrusted: true,
-              timeStamp: Date.now(),
-              type: 'click',
-            } as React.MouseEvent);
-          }
-        }}
+        onOpenChange={handleCancelDelete}
       >
         <AlertDialogContent>
           <AlertDialogHeader>
