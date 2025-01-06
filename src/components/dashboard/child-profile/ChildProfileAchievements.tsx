@@ -12,7 +12,7 @@ export const ChildProfileAchievements = ({ childId, selectedDate }: ChildProfile
   queryDate.setHours(0, 0, 0, 0);
 
   const { data: mealsData } = useQuery({
-    queryKey: ['meals', childId, queryDate],
+    queryKey: ['meals', childId, queryDate.toISOString()],
     queryFn: () => MealService.getMealsByChildAndDate(childId, queryDate),
     enabled: !!childId,
   });
@@ -26,7 +26,7 @@ export const ChildProfileAchievements = ({ childId, selectedDate }: ChildProfile
         <div>
           <div className="flex justify-between mb-1">
             <span>Carbohydrate</span>
-            <span className="text-sm">{Math.round(nutrition.carbs)}/463g</span>
+            <span>{Math.round(nutrition.carbs)}/463g</span>
           </div>
           <div className="h-2 bg-gray-200 rounded">
             <div 
@@ -38,7 +38,7 @@ export const ChildProfileAchievements = ({ childId, selectedDate }: ChildProfile
         <div>
           <div className="flex justify-between mb-1">
             <span>Protein</span>
-            <span className="text-sm">{Math.round(nutrition.protein)}/143g</span>
+            <span>{Math.round(nutrition.protein)}/143g</span>
           </div>
           <div className="h-2 bg-gray-200 rounded">
             <div 
@@ -50,7 +50,7 @@ export const ChildProfileAchievements = ({ childId, selectedDate }: ChildProfile
         <div>
           <div className="flex justify-between mb-1">
             <span>Fat</span>
-            <span className="text-sm">{Math.round(nutrition.fat)}/86g</span>
+            <span>{Math.round(nutrition.fat)}/86g</span>
           </div>
           <div className="h-2 bg-gray-200 rounded">
             <div 
