@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Card } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Apple, Carrot } from "lucide-react";
 
@@ -59,10 +58,10 @@ const FoodQuest = () => {
 
   const getProgressColor = (level: number) => {
     const colors = [
-      'bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500',  // Rainbow gradient
-      'bg-gradient-to-r from-yellow-300 via-orange-400 to-red-500',   // Sunset gradient
-      'bg-gradient-to-r from-green-300 via-emerald-400 to-teal-500',  // Forest gradient
-      'bg-gradient-to-r from-blue-300 via-cyan-400 to-indigo-500'     // Ocean gradient
+      'bg-gradient-to-r from-[#FF6B6B] via-[#FF9F69] to-[#FFD93D]',  // Sunset gradient
+      'bg-gradient-to-r from-[#4FACFE] via-[#00F2FE] to-[#00DBDE]',  // Ocean gradient
+      'bg-gradient-to-r from-[#85FFBD] via-[#87CEEB] to-[#FFFB7D]',  // Spring gradient
+      'bg-gradient-to-r from-[#FF9A9E] via-[#FAD0C4] to-[#FFF1F1]'   // Rose gradient
     ];
     return colors[level % colors.length];
   };
@@ -96,22 +95,22 @@ const FoodQuest = () => {
   };
 
   return (
-    <Card className="p-6 max-w-2xl mx-auto bg-gradient-to-b from-white to-blue-50">
+    <Card className="p-6 max-w-2xl mx-auto bg-gradient-to-b from-[#FEF9C3] to-[#FEFCE8]">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary">
+        <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#FF6B6B] to-[#4FACFE]">
           Food Hero Adventure
         </h2>
-        <div className="bg-gradient-to-r from-primary/20 to-secondary/20 text-primary px-3 py-1 rounded-full animate-pulse">
+        <div className="bg-gradient-to-r from-[#FFB86C]/20 to-[#FF6B6B]/20 text-[#FF6B6B] px-3 py-1 rounded-full animate-pulse">
           Level {heroLevel}
         </div>
       </div>
 
-      <Card className="p-4 mb-6 hover:shadow-lg transition-shadow duration-300 bg-white/80 backdrop-blur-sm">
+      <Card className="p-4 mb-6 hover:shadow-lg transition-shadow duration-300 bg-white/90 backdrop-blur-sm border-[#FFB86C]/20">
         <div className="flex items-center gap-2 mb-2">
           {currentWorldData.iconName === 'Apple' ? (
-            <Apple className="h-6 w-6 text-red-500 animate-bounce" />
+            <Apple className="h-6 w-6 text-[#FF6B6B] animate-bounce" />
           ) : (
-            <Carrot className="h-6 w-6 text-orange-500 animate-bounce" />
+            <Carrot className="h-6 w-6 text-[#FFB86C] animate-bounce" />
           )}
           <h3 className="text-xl font-semibold">{currentWorldData.name}</h3>
         </div>
@@ -125,7 +124,7 @@ const FoodQuest = () => {
             {unlockedFacts.map((fact, index) => (
               <div
                 key={index}
-                className="bg-white/80 backdrop-blur-sm p-3 rounded-lg text-sm transform hover:scale-105 transition-transform duration-200 animate-slideIn shadow-sm hover:shadow-md border border-primary/10"
+                className="bg-white/90 backdrop-blur-sm p-3 rounded-lg text-sm transform hover:scale-105 transition-transform duration-200 animate-slideIn shadow-sm hover:shadow-md border border-[#FFB86C]/20"
                 style={{
                   animationDelay: `${index * 150}ms`
                 }}
@@ -142,7 +141,7 @@ const FoodQuest = () => {
           <span>Power Level</span>
           <span>{powerLevel}%</span>
         </div>
-        <div className="h-4 bg-gray-100 rounded-full overflow-hidden">
+        <div className="h-4 bg-[#FEF9C3] rounded-full overflow-hidden shadow-inner">
           <div
             className={`h-full ${getProgressColor(heroLevel)} transition-all duration-500 animate-pulse`}
             style={{ width: `${powerLevel}%` }}
@@ -153,8 +152,8 @@ const FoodQuest = () => {
       <Button
         className={`w-full transform transition-all duration-300 ${
           isCollecting 
-            ? 'animate-pulse scale-105 bg-gradient-to-r from-yellow-400 to-orange-500' 
-            : 'hover:scale-105 bg-gradient-to-r from-primary to-secondary hover:opacity-90'
+            ? 'animate-pulse scale-105 bg-gradient-to-r from-[#FFB86C] to-[#FF6B6B]' 
+            : 'hover:scale-105 bg-gradient-to-r from-[#FF6B6B] to-[#FFB86C] hover:opacity-90'
         }`}
         size="lg"
         onClick={collectPower}
@@ -171,7 +170,7 @@ const FoodQuest = () => {
             {unlockedPowers.map((power, index) => (
               <div
                 key={index}
-                className="bg-gradient-to-r from-primary/10 to-secondary/10 text-primary text-xs px-3 py-1 rounded-full hover:scale-110 transition-transform duration-200 hover:shadow-md"
+                className="bg-gradient-to-r from-[#FFB86C]/10 to-[#FF6B6B]/10 text-[#FF6B6B] text-xs px-3 py-1 rounded-full hover:scale-110 transition-transform duration-200 hover:shadow-md"
               >
                 {power}
               </div>
