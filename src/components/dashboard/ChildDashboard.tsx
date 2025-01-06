@@ -1,5 +1,5 @@
 import { Calendar } from "./Calendar";
-import { Plus, ArrowLeft } from "lucide-react";
+import { Plus, ArrowLeft, GraduationCap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MealLogDialog } from "./MealLogDialog";
 import { useState, useEffect } from "react";
@@ -86,16 +86,26 @@ export const ChildDashboard = () => {
   return (
     <div className="min-h-screen bg-muted">
       <div className="sticky top-0 z-50 bg-white shadow-sm">
-        <div className="flex items-center p-4">
+        <div className="flex items-center justify-between p-4">
+          <div className="flex items-center">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate('/')}
+              className="mr-2"
+            >
+              <ArrowLeft className="h-6 w-6" />
+            </Button>
+            <h1 className="text-xl font-bold">{childData.name}'s Dashboard</h1>
+          </div>
           <Button
             variant="ghost"
-            size="icon"
-            onClick={() => navigate('/')}
-            className="mr-2"
+            onClick={() => navigate(`/child/${id}/education`)}
+            className="flex items-center gap-2"
           >
-            <ArrowLeft className="h-6 w-6" />
+            <GraduationCap className="h-5 w-5" />
+            <span>Education</span>
           </Button>
-          <h1 className="text-xl font-bold">{childData.name}'s Dashboard</h1>
         </div>
         <Calendar onDateSelect={setSelectedDate} selectedDate={selectedDate} />
       </div>
