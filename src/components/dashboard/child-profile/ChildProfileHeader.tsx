@@ -116,7 +116,22 @@ export const ChildProfileHeader = ({
       <AlertDialog 
         open={showDeleteConfirm} 
         onOpenChange={(open) => {
-          if (!open) handleCancelDelete(new MouseEvent('click') as React.MouseEvent);
+          if (!open) {
+            const syntheticEvent = {
+              preventDefault: () => {},
+              stopPropagation: () => {},
+              target: null,
+              currentTarget: null,
+              bubbles: true,
+              cancelable: true,
+              defaultPrevented: false,
+              eventPhase: 0,
+              isTrusted: true,
+              timeStamp: Date.now(),
+              type: 'click',
+            } as React.MouseEvent;
+            handleCancelDelete(syntheticEvent);
+          }
         }}
       >
         <AlertDialogContent onClick={e => e.stopPropagation()}>
