@@ -1,70 +1,47 @@
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Plus, Edit } from "lucide-react";
-import { NutritionSummary } from "./NutritionSummary";
 import { calculateMealTypeNutrition } from "@/utils/nutritionCalculations";
-import type { Meal } from "@/lib/supabase";
+import { NutritionSummary } from "./NutritionSummary";
 
 interface MealCardProps {
   mealType: string;
-  meals: Meal[];
+  meals: any[];
   onMealLog: (type: string) => void;
 }
 
 export const MealCard = ({ mealType, meals, onMealLog }: MealCardProps) => {
-  const mealsOfType = meals.filter(meal => 
-    meal.type.toLowerCase() === mealType.toLowerCase()
-  );
+  const meal = meals.find(m => m.type.toLowerCase() === mealType.toLowerCase());
   const nutrition = calculateMealTypeNutrition(meals, mealType);
 
   return (
-    <Card className="p-4">
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-medium">{mealType}</h3>
-        {mealsOfType.length === 0 ? (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-8 px-2"
-            onClick={() => onMealLog(mealType.toLowerCase())}
-          >
-            <Plus className="h-4 w-4 mr-1" />
-            Log meal
-          </Button>
-        ) : (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-8 px-2"
-            onClick={() => onMealLog(mealType.toLowerCase())}
-          >
-            <Edit className="h-4 w-4 mr-1" />
-            Edit meal
-          </Button>
-        )}
+    <div className="bg-white rounded-lg p-4 shadow-sm">
+      <div className="flex justify-between items-center mb-2">
+        <div className="flex items-center gap-2">
+          <h3 className="font-medium">{mealType}</h3>
+          <span className="text-sm text-muted-foreground">{nutrition.calories}kcal</span>
+        </div>
+        <NutritionSummary nutrition={nutrition} />
       </div>
-
-      {mealsOfType.map((meal) => (
-        <div key={meal.id} className="mb-4">
-          <div className="flex items-center gap-4 mb-2">
-            {meal.photo_url && (
-              <img
-                src={meal.photo_url}
-                alt={meal.name}
-                className="w-16 h-16 object-cover rounded-lg"
-              />
-            )}
-            <div>
-              <h4 className="font-medium">{meal.name}</h4>
-              <NutritionSummary nutrition={nutrition} />
+      <div 
+        className="h-32 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:bg-muted/80 transition-colors overflow-hidden"
+        onClick={() => onMealLog(mealType.toLowerCase())}
+      >
+        {meal?.photo_url ? (
+          <div className="w-full h-full relative">
+            <img 
+              src={meal.photo_url} 
+              alt={meal.name}
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
+              <span className="text-white font-medium">{meal.name}</span>
             </div>
           </div>
-        </div>
-      ))}
-
-      {mealsOfType.length === 0 && (
-        <p className="text-sm text-muted-foreground">No meals logged yet</p>
-      )}
-    </Card>
+        ) : (
+          <div className="bg-muted w-full h-full flex flex-col items-center justify-center">
+            <span className="text-4xl mb-2">☺</span>
+            <span className="text-muted-foreground">Please Record your diet information!</span>
+          </div>
+        )}
+      </div>
+    </div>
   );
 };

@@ -28,6 +28,7 @@ export const ChildDashboard = () => {
         navigate('/');
         throw new Error("No child ID provided");
       }
+      console.log("Fetching child data for ID:", id);
       const { data, error } = await supabase
         .from("children")
         .select("*")
@@ -38,6 +39,7 @@ export const ChildDashboard = () => {
       if (!data) {
         throw new Error("Child not found");
       }
+      console.log("Child data:", data);
       return data;
     },
     retry: false,
@@ -73,8 +75,6 @@ export const ChildDashboard = () => {
     setShowMealTypeMenu(true);
   };
 
-  const dailyNutrition = calculateDailyNutrition(mealsData || []);
-
   if (childLoading) {
     return <div className="min-h-screen bg-muted flex items-center justify-center">Loading...</div>;
   }
@@ -82,6 +82,8 @@ export const ChildDashboard = () => {
   if (childError || !childData) {
     return <div className="min-h-screen bg-muted flex items-center justify-center">Child not found</div>;
   }
+
+  const dailyNutrition = calculateDailyNutrition(mealsData || []);
 
   return (
     <div className="min-h-screen bg-muted">
