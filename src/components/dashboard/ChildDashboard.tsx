@@ -28,7 +28,6 @@ export const ChildDashboard = () => {
         navigate('/');
         throw new Error("No child ID provided");
       }
-      console.log("Fetching child data for ID:", id);
       const { data, error } = await supabase
         .from("children")
         .select("*")
@@ -39,14 +38,13 @@ export const ChildDashboard = () => {
       if (!data) {
         throw new Error("Child not found");
       }
-      console.log("Child data:", data);
       return data;
     },
     retry: false,
   });
 
   const { data: mealsData, isLoading: mealsLoading } = useQuery({
-    queryKey: ['meals', id, selectedDate],
+    queryKey: ['meals', id, selectedDate.toISOString()],
     queryFn: () => MealService.getMealsByChildAndDate(id!, selectedDate),
     enabled: !!id,
   });
