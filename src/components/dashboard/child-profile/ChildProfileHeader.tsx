@@ -35,34 +35,26 @@ export const ChildProfileHeader = ({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  const handleDeleteClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleDeleteClick = () => {
     setShowDeleteConfirm(true);
+    setIsDropdownOpen(false);
   };
 
   const handleConfirmDelete = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
     setShowDeleteConfirm(false);
     onDelete(e);
   };
 
   const handleCancelDelete = () => {
     setShowDeleteConfirm(false);
-    setIsDropdownOpen(false);
   };
 
   const handleEditClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
     onEdit(e);
     setIsDropdownOpen(false);
   };
 
   const handleMealLogClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
     onMealLog(e);
   };
 
@@ -110,7 +102,7 @@ export const ChildProfileHeader = ({
 
       <AlertDialog 
         open={showDeleteConfirm} 
-        onOpenChange={handleCancelDelete}
+        onOpenChange={setShowDeleteConfirm}
       >
         <AlertDialogContent>
           <AlertDialogHeader>
