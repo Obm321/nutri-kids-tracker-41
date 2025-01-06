@@ -53,6 +53,18 @@ export const ChildProfileHeader = ({
     setShowDeleteConfirm(false);
   };
 
+  const handleEditClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onEdit(e);
+  };
+
+  const handleMealLogClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onMealLog(e);
+  };
+
   return (
     <>
       <div className="flex justify-between items-start mb-4">
@@ -70,11 +82,7 @@ export const ChildProfileHeader = ({
         <div className="flex gap-2">
           <button 
             className="p-2 hover:bg-muted rounded-full"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              onMealLog(e);
-            }}
+            onClick={handleMealLogClick}
           >
             <Camera className="w-5 h-5 text-muted-foreground" />
           </button>
@@ -91,15 +99,11 @@ export const ChildProfileHeader = ({
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="bg-white border shadow-lg">
-              <DropdownMenuItem onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                onEdit(e);
-              }}>
+              <DropdownMenuItem onClick={handleEditClick}>
                 Edit Profile
               </DropdownMenuItem>
               <DropdownMenuItem 
-                onClick={handleDeleteClick} 
+                onClick={handleDeleteClick}
                 className="text-destructive"
               >
                 Remove Profile
@@ -109,7 +113,12 @@ export const ChildProfileHeader = ({
         </div>
       </div>
 
-      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+      <AlertDialog 
+        open={showDeleteConfirm} 
+        onOpenChange={(open) => {
+          if (!open) handleCancelDelete(new MouseEvent('click') as React.MouseEvent);
+        }}
+      >
         <AlertDialogContent onClick={e => e.stopPropagation()}>
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
