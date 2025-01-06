@@ -19,6 +19,7 @@ interface ChildProfileProps {
   gender?: string;
   height?: string;
   weight?: string;
+  selectedDate?: Date;
 }
 
 export const ChildProfile = ({ 
@@ -31,7 +32,8 @@ export const ChildProfile = ({
   onClick,
   onEdit,
   onDelete,
-  id 
+  id,
+  selectedDate
 }: ChildProfileProps) => {
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -144,7 +146,7 @@ export const ChildProfile = ({
           onDelete={handleDelete}
           onMealLog={handleMealLog}
         />
-        {id && <ChildProfileAchievements childId={id} />}
+        {id && <ChildProfileAchievements childId={id} selectedDate={selectedDate} />}
       </Card>
 
       <AddChildDialog
@@ -158,7 +160,7 @@ export const ChildProfile = ({
       <MealLogDialog
         open={showMealLog}
         onOpenChange={setShowMealLog}
-        selectedDate={new Date()}
+        selectedDate={selectedDate || new Date()}
         mealType={null}
       />
     </>

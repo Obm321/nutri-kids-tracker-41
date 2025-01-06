@@ -4,15 +4,16 @@ import { calculateDailyNutrition } from "@/utils/nutritionCalculations";
 
 interface ChildProfileAchievementsProps {
   childId: string;
+  selectedDate?: Date;
 }
 
-export const ChildProfileAchievements = ({ childId }: ChildProfileAchievementsProps) => {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+export const ChildProfileAchievements = ({ childId, selectedDate }: ChildProfileAchievementsProps) => {
+  const queryDate = selectedDate || new Date();
+  queryDate.setHours(0, 0, 0, 0);
 
   const { data: mealsData } = useQuery({
-    queryKey: ['meals', childId, today],
-    queryFn: () => MealService.getMealsByChildAndDate(childId, today),
+    queryKey: ['meals', childId, queryDate],
+    queryFn: () => MealService.getMealsByChildAndDate(childId, queryDate),
     enabled: !!childId,
   });
 
