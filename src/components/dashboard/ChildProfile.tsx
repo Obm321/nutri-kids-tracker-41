@@ -7,6 +7,10 @@ import { AddChildDialog } from "./AddChildDialog";
 import { ChildProfileHeader } from "./child-profile/ChildProfileHeader";
 import { ChildProfileAchievements } from "./child-profile/ChildProfileAchievements";
 import { MealLogDialog } from "./MealLogDialog";
+import { useQuery } from "@tanstack/react-query";
+import { MealService } from "@/services/meals";
+import { NutritionSummary } from "./NutritionSummary";
+import { calculateDailyNutrition } from "@/utils/nutritionCalculations";
 
 interface ChildProfileProps {
   name: string;
@@ -39,6 +43,15 @@ export const ChildProfile = ({
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showMealLog, setShowMealLog] = useState(false);
   const [childData, setChildData] = useState<any>(null);
+  const [selectedDate] = useState(new Date());
+
+  const { data: mealsData } = useQuery({
+    queryKey: ['meals', id, selectedDate.toISOString()],
+    queryFn: () => id ? MealService.getMealsByChildAndDate(id, selectedDate) : Promise.resolve([]),
+    enabled: !!id,
+  });
+
+  const dailyNutrition = calculateDailyNutrition(mealsData || []);
 
   const handleCardClick = () => {
     if (id) {
@@ -144,6 +157,9 @@ export const ChildProfile = ({
           onDelete={handleDelete}
           onMealLog={handleMealLog}
         />
+        <div className="mt-4">
+          <NutritionSummary nutrition={dailyNutrition} showTotal />
+        </div>
         {id && <ChildProfileAchievements childId={id} />}
       </Card>
 
@@ -158,7 +174,7 @@ export const ChildProfile = ({
       <MealLogDialog
         open={showMealLog}
         onOpenChange={setShowMealLog}
-        selectedDate={new Date()}
+        selectedDate={selectedDate}
         mealType={null}
       />
     </>

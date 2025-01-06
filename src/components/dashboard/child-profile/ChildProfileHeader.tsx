@@ -40,8 +40,14 @@ export const ChildProfileHeader = ({
   };
 
   const handleConfirmDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
     setShowDeleteConfirm(false);
     onDelete(e);
+  };
+
+  const handleCancelDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShowDeleteConfirm(false);
   };
 
   return (
@@ -61,7 +67,10 @@ export const ChildProfileHeader = ({
         <div className="flex gap-2">
           <button 
             className="p-2 hover:bg-muted rounded-full"
-            onClick={onMealLog}
+            onClick={(e) => {
+              e.stopPropagation();
+              onMealLog(e);
+            }}
           >
             <Camera className="w-5 h-5 text-muted-foreground" />
           </button>
@@ -74,11 +83,19 @@ export const ChildProfileHeader = ({
                 <Settings className="w-5 h-5 text-muted-foreground" />
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="bg-white border shadow-lg">
-              <DropdownMenuItem onClick={onEdit}>
+            <DropdownMenuContent align="end" className="bg-white">
+              <DropdownMenuItem 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit(e);
+                }}
+              >
                 Edit Profile
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleDeleteClick} className="text-destructive">
+              <DropdownMenuItem 
+                onClick={handleDeleteClick}
+                className="text-destructive focus:text-destructive"
+              >
                 Remove Profile
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -87,7 +104,7 @@ export const ChildProfileHeader = ({
       </div>
 
       <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
-        <AlertDialogContent>
+        <AlertDialogContent onClick={(e) => e.stopPropagation()}>
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
@@ -96,7 +113,7 @@ export const ChildProfileHeader = ({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={(e) => e.stopPropagation()}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel onClick={handleCancelDelete}>Cancel</AlertDialogCancel>
             <AlertDialogAction 
               onClick={handleConfirmDelete}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
