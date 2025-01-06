@@ -14,6 +14,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useState } from "react";
 
@@ -33,11 +34,9 @@ export const ChildProfileHeader = ({
   onMealLog,
 }: ChildProfileHeaderProps) => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const handleDeleteClick = () => {
     setShowDeleteConfirm(true);
-    setIsDropdownOpen(false);
   };
 
   const handleConfirmDelete = (e: React.MouseEvent) => {
@@ -47,15 +46,6 @@ export const ChildProfileHeader = ({
 
   const handleCancelDelete = () => {
     setShowDeleteConfirm(false);
-  };
-
-  const handleEditClick = (e: React.MouseEvent) => {
-    onEdit(e);
-    setIsDropdownOpen(false);
-  };
-
-  const handleMealLogClick = (e: React.MouseEvent) => {
-    onMealLog(e);
   };
 
   return (
@@ -75,54 +65,52 @@ export const ChildProfileHeader = ({
         <div className="flex gap-2">
           <button 
             className="p-2 hover:bg-muted rounded-full"
-            onClick={handleMealLogClick}
+            onClick={onMealLog}
           >
             <Camera className="w-5 h-5 text-muted-foreground" />
           </button>
-          <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
+          <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="p-2 hover:bg-muted rounded-full">
                 <Settings className="w-5 h-5 text-muted-foreground" />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="bg-white border shadow-lg">
-              <DropdownMenuItem onClick={handleEditClick}>
+              <DropdownMenuItem onClick={onEdit}>
                 Edit Profile
               </DropdownMenuItem>
-              <DropdownMenuItem 
-                onClick={handleDeleteClick}
-                className="text-destructive"
-              >
-                Remove Profile
-              </DropdownMenuItem>
+              <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+                <AlertDialogTrigger asChild>
+                  <DropdownMenuItem 
+                    onClick={handleDeleteClick}
+                    className="text-destructive"
+                  >
+                    Remove Profile
+                  </DropdownMenuItem>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This action cannot be undone. This will permanently delete {name}'s profile
+                      and all associated data.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel onClick={handleCancelDelete}>Cancel</AlertDialogCancel>
+                    <AlertDialogAction 
+                      onClick={handleConfirmDelete}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      Delete
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
       </div>
-
-      <AlertDialog 
-        open={showDeleteConfirm}
-        onOpenChange={setShowDeleteConfirm}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete {name}'s profile
-              and all associated data.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={handleCancelDelete}>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleConfirmDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </>
   );
 };
