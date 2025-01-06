@@ -33,11 +33,13 @@ export const ChildProfileHeader = ({
   onMealLog,
 }: ChildProfileHeaderProps) => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const handleDeleteClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setShowDeleteConfirm(true);
+    setDropdownOpen(false);
   };
 
   const handleConfirmDelete = (e: React.MouseEvent) => {
@@ -56,6 +58,7 @@ export const ChildProfileHeader = ({
   const handleEditClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    setDropdownOpen(false);
     onEdit(e);
   };
 
@@ -76,13 +79,23 @@ export const ChildProfileHeader = ({
         <div className="flex gap-2">
           <button 
             className="p-2 hover:bg-muted rounded-full"
-            onClick={onMealLog}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onMealLog(e);
+            }}
           >
             <Camera className="w-5 h-5 text-muted-foreground" />
           </button>
-          <DropdownMenu>
+          <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
             <DropdownMenuTrigger asChild>
-              <button className="p-2 hover:bg-muted rounded-full">
+              <button 
+                className="p-2 hover:bg-muted rounded-full"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                }}
+              >
                 <Settings className="w-5 h-5 text-muted-foreground" />
               </button>
             </DropdownMenuTrigger>
@@ -103,9 +116,13 @@ export const ChildProfileHeader = ({
 
       <AlertDialog 
         open={showDeleteConfirm} 
-        onOpenChange={setShowDeleteConfirm}
+        onOpenChange={(open) => {
+          if (!open) {
+            setShowDeleteConfirm(false);
+          }
+        }}
       >
-        <AlertDialogContent>
+        <AlertDialogContent onClick={(e) => e.stopPropagation()}>
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
