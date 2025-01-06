@@ -58,10 +58,10 @@ const FoodQuest = () => {
 
   const getProgressColor = (level: number) => {
     const colors = [
-      'bg-gradient-to-r from-[#FF6B6B] via-[#FF9F69] to-[#FFD93D]',  // Sunset gradient
-      'bg-gradient-to-r from-[#4FACFE] via-[#00F2FE] to-[#00DBDE]',  // Ocean gradient
-      'bg-gradient-to-r from-[#85FFBD] via-[#87CEEB] to-[#FFFB7D]',  // Spring gradient
-      'bg-gradient-to-r from-[#FF9A9E] via-[#FAD0C4] to-[#FFF1F1]'   // Rose gradient
+      'bg-gradient-to-r from-[#FFA500] via-[#FF7F50] to-[#FF4500]',  // Orange to Red
+      'bg-gradient-to-r from-[#32CD32] via-[#98FF98] to-[#40E0D0]',  // Lime to Turquoise
+      'bg-gradient-to-r from-[#FF00FF] via-[#E6E6FA] to-[#CCCCFF]',  // Magenta to Periwinkle
+      'bg-gradient-to-r from-[#FFD700] via-[#FFFFE0] to-[#FFFDD0]'   // Gold to Cream
     ];
     return colors[level % colors.length];
   };
@@ -95,41 +95,41 @@ const FoodQuest = () => {
   };
 
   return (
-    <Card className="p-6 max-w-2xl mx-auto bg-gradient-to-b from-[#FEF9C3] to-[#FEFCE8]">
+    <Card className="p-6 max-w-2xl mx-auto bg-gradient-to-b from-[#E6E6FA] to-[#FFC0CB] shadow-xl">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#FF6B6B] to-[#4FACFE]">
+        <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#87CEEB] to-[#FFD700]">
           Food Hero Adventure
         </h2>
-        <div className="bg-gradient-to-r from-[#FFB86C]/20 to-[#FF6B6B]/20 text-[#FF6B6B] px-3 py-1 rounded-full animate-pulse">
+        <div className="bg-gradient-to-r from-[#FF00FF]/20 to-[#40E0D0]/20 text-[#FF00FF] px-3 py-1 rounded-full animate-pulse">
           Level {heroLevel}
         </div>
       </div>
 
-      <Card className="p-4 mb-6 hover:shadow-lg transition-shadow duration-300 bg-white/90 backdrop-blur-sm border-[#FFB86C]/20">
+      <Card className="p-4 mb-6 hover:shadow-lg transition-shadow duration-300 bg-white/90 backdrop-blur-sm border-[#B0E0E6] hover:border-[#87CEEB]">
         <div className="flex items-center gap-2 mb-2">
           {currentWorldData.iconName === 'Apple' ? (
-            <Apple className="h-6 w-6 text-[#FF6B6B] animate-bounce" />
+            <Apple className="h-6 w-6 text-[#FF4500] animate-bounce" />
           ) : (
-            <Carrot className="h-6 w-6 text-[#FFB86C] animate-bounce" />
+            <Carrot className="h-6 w-6 text-[#FFA500] animate-bounce" />
           )}
-          <h3 className="text-xl font-semibold">{currentWorldData.name}</h3>
+          <h3 className="text-xl font-semibold text-[#32CD32]">{currentWorldData.name}</h3>
         </div>
-        <p className="text-muted-foreground">{currentWorldData.description}</p>
+        <p className="text-[#FF7F50]">{currentWorldData.description}</p>
       </Card>
 
       {unlockedFacts.length > 0 && (
         <div className="mb-6 animate-fadeIn">
-          <h4 className="text-sm font-semibold mb-3 text-center">Fun Facts Discovered</h4>
+          <h4 className="text-sm font-semibold mb-3 text-center text-[#FF00FF]">Fun Facts Discovered</h4>
           <div className="space-y-2">
             {unlockedFacts.map((fact, index) => (
               <div
                 key={index}
-                className="bg-white/90 backdrop-blur-sm p-3 rounded-lg text-sm transform hover:scale-105 transition-transform duration-200 animate-slideIn shadow-sm hover:shadow-md border border-[#FFB86C]/20"
+                className="bg-[#FFFFE0] backdrop-blur-sm p-3 rounded-lg text-sm transform hover:scale-105 transition-transform duration-200 animate-slideIn shadow-sm hover:shadow-md border border-[#B0E0E6] hover:border-[#87CEEB]"
                 style={{
                   animationDelay: `${index * 150}ms`
                 }}
               >
-                {fact}
+                <span className="text-[#FF4500]">{fact}</span>
               </div>
             ))}
           </div>
@@ -138,10 +138,10 @@ const FoodQuest = () => {
 
       <div className="space-y-2 mb-6">
         <div className="flex justify-between text-sm font-medium">
-          <span>Power Level</span>
-          <span>{powerLevel}%</span>
+          <span className="text-[#FF00FF]">Power Level</span>
+          <span className="text-[#40E0D0]">{powerLevel}%</span>
         </div>
-        <div className="h-4 bg-[#FEF9C3] rounded-full overflow-hidden shadow-inner">
+        <div className="h-6 bg-[#FFFFB3] rounded-full overflow-hidden shadow-inner border-2 border-[#B0E0E6]">
           <div
             className={`h-full ${getProgressColor(heroLevel)} transition-all duration-500 animate-pulse`}
             style={{ width: `${powerLevel}%` }}
@@ -152,9 +152,9 @@ const FoodQuest = () => {
       <Button
         className={`w-full transform transition-all duration-300 ${
           isCollecting 
-            ? 'animate-pulse scale-105 bg-gradient-to-r from-[#FFB86C] to-[#FF6B6B]' 
-            : 'hover:scale-105 bg-gradient-to-r from-[#FF6B6B] to-[#FFB86C] hover:opacity-90'
-        }`}
+            ? 'animate-pulse scale-105 bg-gradient-to-r from-[#FFD700] to-[#FFA500]' 
+            : 'hover:scale-105 bg-gradient-to-r from-[#FFA500] to-[#FF4500] hover:opacity-90'
+        } text-white font-bold shadow-lg hover:shadow-xl`}
         size="lg"
         onClick={collectPower}
         disabled={isCollecting}
@@ -164,13 +164,13 @@ const FoodQuest = () => {
       </Button>
 
       {unlockedPowers.length > 0 && (
-        <div className="mt-6 pt-6 border-t animate-fadeIn">
-          <h4 className="text-sm font-semibold mb-3">Your Special Powers</h4>
+        <div className="mt-6 pt-6 border-t border-[#B0E0E6] animate-fadeIn">
+          <h4 className="text-sm font-semibold mb-3 text-[#FF00FF]">Your Special Powers</h4>
           <div className="flex flex-wrap gap-2">
             {unlockedPowers.map((power, index) => (
               <div
                 key={index}
-                className="bg-gradient-to-r from-[#FFB86C]/10 to-[#FF6B6B]/10 text-[#FF6B6B] text-xs px-3 py-1 rounded-full hover:scale-110 transition-transform duration-200 hover:shadow-md"
+                className="bg-gradient-to-r from-[#32CD32]/10 to-[#40E0D0]/10 text-[#32CD32] text-xs px-3 py-1 rounded-full hover:scale-110 transition-transform duration-200 hover:shadow-md border border-[#B0E0E6]"
               >
                 {power}
               </div>
