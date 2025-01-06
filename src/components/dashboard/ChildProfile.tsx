@@ -7,7 +7,6 @@ import { AddChildDialog } from "./AddChildDialog";
 import { ChildProfileHeader } from "./child-profile/ChildProfileHeader";
 import { ChildProfileAchievements } from "./child-profile/ChildProfileAchievements";
 import { MealLogDialog } from "./MealLogDialog";
-import { useQueryClient } from "@tanstack/react-query";
 
 interface ChildProfileProps {
   name: string;
@@ -38,7 +37,6 @@ export const ChildProfile = ({
 }: ChildProfileProps) => {
   const { toast } = useToast();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showMealLog, setShowMealLog] = useState(false);
@@ -86,10 +84,6 @@ export const ChildProfile = ({
 
         if (error) throw error;
 
-        // Invalidate all queries related to this child
-        queryClient.invalidateQueries({ queryKey: ['meals', id] });
-        queryClient.invalidateQueries({ queryKey: ['children'] });
-
         toast({
           title: "Success",
           description: "Child profile removed successfully.",
@@ -122,14 +116,12 @@ export const ChildProfile = ({
 
         if (error) throw error;
 
-        // Invalidate queries after successful update
-        queryClient.invalidateQueries({ queryKey: ['children'] });
-
         toast({
           title: "Success",
           description: "Child profile updated successfully.",
         });
         setShowEditDialog(false);
+        window.location.reload();
       } catch (error) {
         console.error('Error updating child:', error);
         toast({
