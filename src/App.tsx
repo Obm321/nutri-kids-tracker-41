@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import { ChildDashboard } from "./components/dashboard/ChildDashboard";
+import { ChildEducation } from "./components/education/ChildEducation";
 
 // Create a client
 const queryClient = new QueryClient({
@@ -24,6 +25,7 @@ const App = () => {
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/child/:id" element={<ChildDashboard />} />
+            <Route path="/child/:id/education" element={<ChildEducation />} />
           </Routes>
           <Toaster />
           <Sonner />
