@@ -18,15 +18,22 @@ export const MealService = {
     try {
       console.log('Starting meal creation process...', { childId, name, type, dateTime });
       
-      // First upload the photo
-      console.log('Uploading photo...');
-      const photoUrl = await StorageService.uploadFile('meal-photos', photoFile);
-      console.log('Photo uploaded successfully:', photoUrl);
-
-      // Get nutrition information from Spoonacular
+      // Convert image file to base64
+      const base64Image = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          if (typeof reader.result === 'string') {
+            resolve(reader.result);
+          }
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(photoFile);
+      });
+      
+      // First analyze the meal using the image
       console.log('Analyzing meal nutrition...');
       const { data: nutritionData, error: nutritionError } = await supabase.functions.invoke('analyze-meal', {
-        body: { mealName: name }
+        body: { imageData: base64Image }
       });
 
       if (nutritionError) {
@@ -35,6 +42,11 @@ export const MealService = {
       }
 
       console.log('Nutrition data:', nutritionData);
+
+      // Upload the photo
+      console.log('Uploading photo...');
+      const photoUrl = await StorageService.uploadFile('meal-photos', photoFile);
+      console.log('Photo uploaded successfully:', photoUrl);
 
       // Then create the meal record with nutrition data
       console.log('Creating meal record in database...');

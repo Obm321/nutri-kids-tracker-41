@@ -26,10 +26,21 @@ serve(async (req) => {
       throw new Error('Spoonacular API key not found')
     }
 
-    // Create form data with the base64 image
+    // Convert base64 to blob
+    const base64Data = imageData.split(',')[1];
+    const byteString = atob(base64Data);
+    const arrayBuffer = new ArrayBuffer(byteString.length);
+    const uint8Array = new Uint8Array(arrayBuffer);
+    
+    for (let i = 0; i < byteString.length; i++) {
+      uint8Array[i] = byteString.charCodeAt(i);
+    }
+    
+    const blob = new Blob([uint8Array], { type: 'image/jpeg' });
+
+    // Create form data with the blob
     const formData = new FormData()
-    const blob = await fetch(imageData).then(res => res.blob())
-    formData.append('file', blob)
+    formData.append('file', blob, 'meal.jpg')
 
     // Query Spoonacular API for nutritional information using image analysis
     const response = await fetch(
