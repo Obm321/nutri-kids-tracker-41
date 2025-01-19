@@ -14,33 +14,48 @@ export type Database = {
           achievements: number | null
           age: number
           created_at: string
+          current_world: string | null
           gender: string
           height: string
+          hero_level: number | null
           id: number
           name: string
+          power_level: number | null
           profile_id: string
+          unlocked_facts: string[] | null
+          unlocked_powers: string[] | null
           weight: string
         }
         Insert: {
           achievements?: number | null
           age: number
           created_at?: string
+          current_world?: string | null
           gender: string
           height: string
+          hero_level?: number | null
           id?: never
           name: string
+          power_level?: number | null
           profile_id: string
+          unlocked_facts?: string[] | null
+          unlocked_powers?: string[] | null
           weight: string
         }
         Update: {
           achievements?: number | null
           age?: number
           created_at?: string
+          current_world?: string | null
           gender?: string
           height?: string
+          hero_level?: number | null
           id?: never
           name?: string
+          power_level?: number | null
           profile_id?: string
+          unlocked_facts?: string[] | null
+          unlocked_powers?: string[] | null
           weight?: string
         }
         Relationships: []

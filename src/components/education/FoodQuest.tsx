@@ -1,7 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Apple, Carrot } from "lucide-react";
+import { supabase } from "@/lib/supabase";
+import { useParams } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 interface WorldData {
   name: string;
@@ -44,12 +47,79 @@ const worldsData: WorldData[] = [
 ];
 
 const FoodQuest = () => {
+  const { id } = useParams();
+  const { toast } = useToast();
   const [heroLevel, setHeroLevel] = useState(1);
   const [powerLevel, setPowerLevel] = useState(0);
   const [currentWorld, setCurrentWorld] = useState('Fruit Forest');
   const [unlockedPowers, setUnlockedPowers] = useState<string[]>([]);
   const [isCollecting, setIsCollecting] = useState(false);
   const [unlockedFacts, setUnlockedFacts] = useState<string[]>([]);
+
+  // Load saved progress
+  useEffect(() => {
+    const loadProgress = async () => {
+      if (!id) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from('children')
+          .select('hero_level, power_level, current_world, unlocked_powers, unlocked_facts')
+          .eq('id', id)
+          .single();
+
+        if (error) throw error;
+
+        if (data) {
+          setHeroLevel(data.hero_level || 1);
+          setPowerLevel(data.power_level || 0);
+          setCurrentWorld(data.current_world || 'Fruit Forest');
+          setUnlockedPowers(data.unlocked_powers || []);
+          setUnlockedFacts(data.unlocked_facts || []);
+        }
+      } catch (error) {
+        console.error('Error loading progress:', error);
+        toast({
+          title: "Error",
+          description: "Could not load saved progress",
+          variant: "destructive",
+        });
+      }
+    };
+
+    loadProgress();
+  }, [id, toast]);
+
+  // Save progress when it changes
+  useEffect(() => {
+    const saveProgress = async () => {
+      if (!id) return;
+
+      try {
+        const { error } = await supabase
+          .from('children')
+          .update({
+            hero_level: heroLevel,
+            power_level: powerLevel,
+            current_world: currentWorld,
+            unlocked_powers: unlockedPowers,
+            unlocked_facts: unlockedFacts,
+          })
+          .eq('id', id);
+
+        if (error) throw error;
+      } catch (error) {
+        console.error('Error saving progress:', error);
+        toast({
+          title: "Error",
+          description: "Could not save progress",
+          variant: "destructive",
+        });
+      }
+    };
+
+    saveProgress();
+  }, [id, heroLevel, powerLevel, currentWorld, unlockedPowers, unlockedFacts, toast]);
 
   const currentWorldData = worldsData.find(w => w.name === currentWorld);
   if (!currentWorldData) {
