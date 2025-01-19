@@ -48,6 +48,12 @@ export const MealService = {
       const photoUrl = await StorageService.uploadFile('meal-photos', photoFile);
       console.log('Photo uploaded successfully:', photoUrl);
 
+      // Extract numeric values from nutrition data
+      const calories = nutritionData.calories?.value || 0;
+      const carbs = nutritionData.carbs?.value || 0;
+      const protein = nutritionData.protein?.value || 0;
+      const fat = nutritionData.fat?.value || 0;
+
       // Then create the meal record with nutrition data
       console.log('Creating meal record in database...');
       const { data: meal, error: insertError } = await supabase
@@ -59,10 +65,10 @@ export const MealService = {
             type,
             photo_url: photoUrl,
             date: dateTime.toISOString(),
-            calories: nutritionData.calories,
-            carbs: nutritionData.carbs,
-            protein: nutritionData.protein,
-            fat: nutritionData.fat,
+            calories: calories,
+            carbs: carbs,
+            protein: protein,
+            fat: fat,
           }
         ])
         .select()
